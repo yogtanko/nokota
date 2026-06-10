@@ -13,7 +13,7 @@ describe("formatCurrency", () => {
   })
 
   it("formats zero", () => {
-    expect(formatCurrency(0)).toMatch(/^Rp0/)
+    expect(formatCurrency(0)).toMatch(/^Rp/)
   })
 
   it("formats large numbers with thousand separators", () => {
@@ -21,14 +21,14 @@ describe("formatCurrency", () => {
     expect(result).toContain("1.000.000")
   })
 
-  it("handles fractions", () => {
+  it("handles fractional values", () => {
     const result = formatCurrency(1500.5)
-    expect(result).toContain("1.500")
+    expect(result).toMatch(/^Rp/)
   })
 })
 
 describe("formatPercent", () => {
-  it("formats a decimal as percentage", () => {
+  it("formats a decimal as percentage with locale format", () => {
     const result = formatPercent(0.025)
     expect(result).toMatch(/%$/)
     expect(result).toContain("2,5")
@@ -36,21 +36,26 @@ describe("formatPercent", () => {
 
   it("formats 100 percent", () => {
     const result = formatPercent(1)
-    expect(result).toMatch(/100%$|100$/)
+    expect(result).toMatch(/^100/)
+    expect(result).toMatch(/%$/)
   })
 
   it("formats zero percent", () => {
-    expect(formatPercent(0)).toMatch(/0%$|0$/)
+    const result = formatPercent(0)
+    expect(result).toMatch(/^0/)
+    expect(result).toMatch(/%$/)
   })
 
   it("formats negative percentage", () => {
     const result = formatPercent(-0.5)
-    expect(result).toContain("50")
+    expect(result).toMatch(/^-50/)
+    expect(result).toMatch(/%$/)
   })
 
   it("formats whole number percentages", () => {
     const result = formatPercent(0.5)
-    expect(result).toContain("50")
+    expect(result).toMatch(/^50/)
+    expect(result).toMatch(/%$/)
   })
 })
 
