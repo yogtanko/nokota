@@ -17,7 +17,7 @@ export default defineConfig({
         "src/components/ui/**",
         "src/lib/utils.ts",
         "src/app/globals.css",
-        "src/app/layout.tsx",
+        "src/**/layout.tsx",
       ],
       thresholds: {
         branches: 80,
