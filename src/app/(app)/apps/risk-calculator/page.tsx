@@ -1,4 +1,6 @@
 import ProfileSection from "@/components/profile-section"
+import StockLookup from "@/components/stock-lookup"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function RiskCalculatorPage() {
   return (
@@ -12,11 +14,17 @@ export default function RiskCalculatorPage() {
 
       <ProfileSection />
 
-      <div className="flex flex-col items-center justify-center py-16 border rounded-xl bg-muted/30">
-        <p className="text-muted-foreground text-center max-w-md">
-          Calculator inputs and results coming soon.
-        </p>
-      </div>
+      <Card size="sm">
+        <CardHeader>
+          <CardTitle>Trade Setup</CardTitle>
+          <CardDescription>
+            Look up a stock or enter price manually
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <StockLookup />
+        </CardContent>
+      </Card>
     </div>
   )
 }
