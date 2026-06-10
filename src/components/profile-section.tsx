@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { useAccountProfile } from "@/store/account-profile"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -8,6 +9,11 @@ export default function ProfileSection() {
   const riskPercent = useAccountProfile((s) => s.riskPercent)
   const setBalance = useAccountProfile((s) => s.setBalance)
   const setRiskPercent = useAccountProfile((s) => s.setRiskPercent)
+
+  const [riskText, setRiskText] = useState(() => {
+    const pct = riskPercent * 100
+    return pct % 1 === 0 ? String(pct) : String(pct)
+  })
 
   return (
     <Card size="sm">
@@ -59,9 +65,10 @@ export default function ProfileSection() {
                 id="risk-percent"
                 type="text"
                 inputMode="decimal"
-                value={riskPercent === 0.02 ? "2" : String(riskPercent * 100)}
+                value={riskText}
                 onChange={(e) => {
                   const raw = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".")
+                  setRiskText(raw)
                   if (raw === "" || raw === ".") {
                     setRiskPercent(0)
                   } else {
