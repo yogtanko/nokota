@@ -13,7 +13,14 @@ describe("Profile Section", () => {
     expect(screen.getByText("Account Profile")).toBeInTheDocument()
   })
 
-  it("renders balance input with current store value", () => {
+  it("shows empty balance input when balance is 0", () => {
+    render(<ProfileSection />)
+
+    const balanceInput = screen.getByLabelText(/account balance/i) as HTMLInputElement
+    expect(balanceInput.value).toBe("")
+  })
+
+  it("renders balance input with formatted current store value", () => {
     useAccountProfile.getState().setBalance(50_000_000)
     render(<ProfileSection />)
 
@@ -21,12 +28,29 @@ describe("Profile Section", () => {
     expect(balanceInput.value).toBe("50000000")
   })
 
-  it("renders risk percent input with current store value", () => {
+  it("renders Rp prefix", () => {
+    render(<ProfileSection />)
+    expect(screen.getByText("Rp")).toBeInTheDocument()
+  })
+
+  it("shows formatted currency preview when balance > 0", () => {
+    useAccountProfile.getState().setBalance(1_000_000)
+    render(<ProfileSection />)
+
+    expect(screen.getByText(/1\.000\.000/)).toBeInTheDocument()
+  })
+
+  it("renders risk percent input as whole number", () => {
     useAccountProfile.getState().setRiskPercent(0.05)
     render(<ProfileSection />)
 
     const riskInput = screen.getByLabelText(/risk per trade/i) as HTMLInputElement
-    expect(riskInput.value).toBe("0.05")
+    expect(riskInput.value).toBe("5")
+  })
+
+  it("renders percent suffix", () => {
+    render(<ProfileSection />)
+    expect(screen.getByText("%")).toBeInTheDocument()
   })
 
   it("updates store when balance input changes", () => {
@@ -42,7 +66,7 @@ describe("Profile Section", () => {
     render(<ProfileSection />)
 
     const riskInput = screen.getByLabelText(/risk per trade/i)
-    fireEvent.change(riskInput, { target: { value: "0.03" } })
+    fireEvent.change(riskInput, { target: { value: "3" } })
 
     expect(useAccountProfile.getState().riskPercent).toBe(0.03)
   })

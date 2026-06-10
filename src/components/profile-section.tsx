@@ -2,6 +2,7 @@
 
 import { useAccountProfile } from "@/store/account-profile"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { formatCurrency, formatPercent } from "@/lib/calculator/formatting"
 
 export default function ProfileSection() {
   const balance = useAccountProfile((s) => s.balance)
@@ -24,35 +25,66 @@ export default function ProfileSection() {
               htmlFor="balance"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              Account Balance (Rp)
+              Account Balance
             </label>
-            <input
-              id="balance"
-              type="number"
-              inputMode="numeric"
-              value={balance}
-              onChange={(e) => setBalance(Number(e.target.value))}
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-            />
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none select-none">
+                Rp
+              </span>
+              <input
+                id="balance"
+                type="text"
+                inputMode="numeric"
+                value={balance || ""}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/\D/g, "")
+                  if (raw === "") {
+                    setBalance(0)
+                  } else {
+                    setBalance(Number(raw))
+                  }
+                }}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent pl-8 pr-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+            {balance > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {formatCurrency(balance)}
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <label
               htmlFor="risk-percent"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              Risk per Trade (%)
+              Risk per Trade
             </label>
-            <input
-              id="risk-percent"
-              type="number"
-              inputMode="decimal"
-              step="0.01"
-              min="0"
-              max="100"
-              value={riskPercent}
-              onChange={(e) => setRiskPercent(Number(e.target.value))}
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-            />
+            <div className="relative">
+              <input
+                id="risk-percent"
+                type="text"
+                inputMode="decimal"
+                value={riskPercent === 0.02 ? "2" : String(riskPercent * 100)}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".")
+                  if (raw === "" || raw === ".") {
+                    setRiskPercent(0)
+                  } else {
+                    setRiskPercent(Number(raw) / 100)
+                  }
+                }}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 pr-7 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none select-none">
+                %
+              </span>
+            </div>
+            {riskPercent > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {formatPercent(riskPercent)}
+              </p>
+            )}
           </div>
         </div>
       </CardContent>
