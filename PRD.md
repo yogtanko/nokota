@@ -34,7 +34,7 @@ Trade Deck — a monolithic Next.js portal serving as the hub for all financial 
 ## Implementation Decisions
 
 - **Architecture**: Single Next.js monolith with App Router. Route groups separate portal layout from app layouts. Each application lives in its own route group under the apps namespace.
-- **UI Framework**: Tailwind CSS with shadcn/ui components for consistent, professional styling with full customizability, --preset b2BoVh7z9.
+- **UI Framework**: Tailwind CSS with shadcn/ui components for consistent, professional styling with full customizability, --preset b397UdYWv.
 - **State Management**: Zustand with `persist` middleware stores account profile (balance, risk percentage) in localStorage. Calculator inputs (symbol, entry price, stop loss, take profit) use local component state and are not persisted.
 - **Stock Data**: Yahoo Finance via the `yahoo-finance2` package, proxied through a Next.js API route. The `.JK` suffix is auto-appended for IDX stocks. Entry price auto-fills from lookup but remains manually editable.
 - **Lookup Error UX**: Inline helper text below the symbol input (not a popup or modal) showing the error. The calculator remains usable with manual price entry if lookup fails.
