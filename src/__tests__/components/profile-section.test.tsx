@@ -90,4 +90,24 @@ describe("Profile Section", () => {
     expect(riskInput.value).toBe("2,55")
     expect(useAccountProfile.getState().riskPercent).toBe(0.0255)
   })
+
+  it("prepends 0 when comma is typed at the start", () => {
+    render(<ProfileSection />)
+
+    const riskInput = screen.getByLabelText(/risk per trade/i) as HTMLInputElement
+    fireEvent.change(riskInput, { target: { value: "," } })
+
+    expect(riskInput.value).toBe("0,")
+    expect(useAccountProfile.getState().riskPercent).toBe(0)
+  })
+
+  it("accepts leading comma as 0,...", () => {
+    render(<ProfileSection />)
+
+    const riskInput = screen.getByLabelText(/risk per trade/i) as HTMLInputElement
+    fireEvent.change(riskInput, { target: { value: ",5" } })
+
+    expect(riskInput.value).toBe("0,5")
+    expect(useAccountProfile.getState().riskPercent).toBe(0.005)
+  })
 })

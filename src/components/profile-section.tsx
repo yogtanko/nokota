@@ -69,9 +69,13 @@ export default function ProfileSection() {
                   let raw = e.target.value.replace(/[^\d,]/g, "")
                   const commaIdx = raw.indexOf(",")
                   if (commaIdx !== -1) {
-                    const before = raw.slice(0, commaIdx)
-                    const after = raw.slice(commaIdx + 1).replace(/,/g, "")
-                    raw = before + "," + after.slice(0, 2)
+                    let before = raw.slice(0, commaIdx)
+                    let after = raw.slice(commaIdx + 1).replace(/,/g, "").slice(0, 2)
+                    if (before === "") {
+                      raw = "0," + after
+                    } else {
+                      raw = before + "," + after
+                    }
                   }
                   setRiskText(raw)
                   const parsed = raw.replace(",", ".")
