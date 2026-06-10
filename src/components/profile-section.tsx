@@ -2,7 +2,6 @@
 
 import { useAccountProfile } from "@/store/account-profile"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { formatCurrency, formatPercent } from "@/lib/calculator/formatting"
 
 export default function ProfileSection() {
   const balance = useAccountProfile((s) => s.balance)
@@ -35,7 +34,7 @@ export default function ProfileSection() {
                 id="balance"
                 type="text"
                 inputMode="numeric"
-                value={balance || ""}
+                value={balance > 0 ? balance.toLocaleString("id-ID") : ""}
                 onChange={(e) => {
                   const raw = e.target.value.replace(/\D/g, "")
                   if (raw === "") {
@@ -47,11 +46,6 @@ export default function ProfileSection() {
                 className="flex h-9 w-full rounded-md border border-input bg-transparent pl-8 pr-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
-            {balance > 0 && (
-              <p className="text-xs text-muted-foreground">
-                {formatCurrency(balance)}
-              </p>
-            )}
           </div>
           <div className="space-y-2">
             <label
@@ -80,11 +74,6 @@ export default function ProfileSection() {
                 %
               </span>
             </div>
-            {riskPercent > 0 && (
-              <p className="text-xs text-muted-foreground">
-                {formatPercent(riskPercent)}
-              </p>
-            )}
           </div>
         </div>
       </CardContent>

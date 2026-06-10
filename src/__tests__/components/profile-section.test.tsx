@@ -25,7 +25,7 @@ describe("Profile Section", () => {
     render(<ProfileSection />)
 
     const balanceInput = screen.getByLabelText(/account balance/i) as HTMLInputElement
-    expect(balanceInput.value).toBe("50000000")
+    expect(balanceInput.value).toBe("50.000.000")
   })
 
   it("renders Rp prefix", () => {
@@ -33,11 +33,12 @@ describe("Profile Section", () => {
     expect(screen.getByText("Rp")).toBeInTheDocument()
   })
 
-  it("shows formatted currency preview when balance > 0", () => {
+  it("shows formatted balance with thousand separators in input", () => {
     useAccountProfile.getState().setBalance(1_000_000)
     render(<ProfileSection />)
 
-    expect(screen.getByText(/1\.000\.000/)).toBeInTheDocument()
+    const balanceInput = screen.getByLabelText(/account balance/i) as HTMLInputElement
+    expect(balanceInput.value).toBe("1.000.000")
   })
 
   it("renders risk percent input as whole number", () => {
@@ -57,7 +58,7 @@ describe("Profile Section", () => {
     render(<ProfileSection />)
 
     const balanceInput = screen.getByLabelText(/account balance/i)
-    fireEvent.change(balanceInput, { target: { value: "75000000" } })
+    fireEvent.change(balanceInput, { target: { value: "75.000.000" } })
 
     expect(useAccountProfile.getState().balance).toBe(75_000_000)
   })
