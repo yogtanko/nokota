@@ -71,4 +71,23 @@ describe("Profile Section", () => {
 
     expect(useAccountProfile.getState().riskPercent).toBe(0.03)
   })
+
+  it("accepts decimal with comma separator", () => {
+    render(<ProfileSection />)
+
+    const riskInput = screen.getByLabelText(/risk per trade/i)
+    fireEvent.change(riskInput, { target: { value: "2,5" } })
+
+    expect(useAccountProfile.getState().riskPercent).toBe(0.025)
+  })
+
+  it("limits to 2 decimal places after comma", () => {
+    render(<ProfileSection />)
+
+    const riskInput = screen.getByLabelText(/risk per trade/i) as HTMLInputElement
+    fireEvent.change(riskInput, { target: { value: "2,555" } })
+
+    expect(riskInput.value).toBe("2,55")
+    expect(useAccountProfile.getState().riskPercent).toBe(0.0255)
+  })
 })

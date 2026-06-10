@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { useAccountProfile } from "@/store/account-profile"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -8,6 +9,10 @@ export default function ProfileSection() {
   const riskPercent = useAccountProfile((s) => s.riskPercent)
   const setBalance = useAccountProfile((s) => s.setBalance)
   const setRiskPercent = useAccountProfile((s) => s.setRiskPercent)
+
+  const [riskText, setRiskText] = useState(() =>
+    String(riskPercent * 100).replace(".", ",")
+  )
 
   return (
     <Card size="sm">
@@ -59,13 +64,21 @@ export default function ProfileSection() {
                 id="risk-percent"
                 type="text"
                 inputMode="decimal"
-                value={riskPercent === 0.02 ? "2" : String(riskPercent * 100)}
+                value={riskText}
                 onChange={(e) => {
-                  const raw = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".")
-                  if (raw === "" || raw === ".") {
+                  let raw = e.target.value.replace(/[^\d,]/g, "")
+                  const commaIdx = raw.indexOf(",")
+                  if (commaIdx !== -1) {
+                    const before = raw.slice(0, commaIdx)
+                    const after = raw.slice(commaIdx + 1).replace(/,/g, "")
+                    raw = before + "," + after.slice(0, 2)
+                  }
+                  setRiskText(raw)
+                  const parsed = raw.replace(",", ".")
+                  if (parsed === "" || parsed === ".") {
                     setRiskPercent(0)
                   } else {
-                    setRiskPercent(Number(raw) / 100)
+                    setRiskPercent(Number(parsed) / 100)
                   }
                 }}
                 className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 pr-7 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
