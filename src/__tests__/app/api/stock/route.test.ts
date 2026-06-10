@@ -1,13 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { NextRequest } from "next/server"
 
-const mockQuote = vi.hoisted(() => vi.fn())
-
-vi.mock("yahoo-finance2", () => ({
-  default: vi.fn(() => ({
-    quote: mockQuote,
-  })),
+const { mockQuote } = vi.hoisted(() => ({
+  mockQuote: vi.fn(),
 }))
+
+vi.mock("yahoo-finance2", () => {
+  class MockYahooFinance {
+    quote = mockQuote
+  }
+  return { default: MockYahooFinance }
+})
 
 import { GET } from "@/app/api/stock/[symbol]/route"
 
