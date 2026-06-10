@@ -47,6 +47,10 @@ describe("Account Profile Store", () => {
   })
 
   it("rehydrates state from localStorage", async () => {
+    useAccountProfile.setState({ balance: 0, riskPercent: 0.02 })
+
+    await new Promise(process.nextTick)
+
     localStorage.setItem(
       "account-profile",
       JSON.stringify({
@@ -55,7 +59,6 @@ describe("Account Profile Store", () => {
       })
     )
 
-    useAccountProfile.setState({ balance: 0, riskPercent: 0.02 })
     await useAccountProfile.persist.rehydrate()
 
     const state = useAccountProfile.getState()
