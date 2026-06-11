@@ -1,18 +1,25 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAccountProfile } from "@/store/account-profile"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function ProfileSection() {
   const balance = useAccountProfile((s) => s.balance)
   const riskPercent = useAccountProfile((s) => s.riskPercent)
+  const hydrated = useAccountProfile((s) => s.hydrated)
   const setBalance = useAccountProfile((s) => s.setBalance)
   const setRiskPercent = useAccountProfile((s) => s.setRiskPercent)
 
   const [riskText, setRiskText] = useState(() =>
     String(riskPercent * 100).replace(".", ",")
   )
+
+  useEffect(() => {
+    if (hydrated) {
+      setRiskText(String(riskPercent * 100).replace(".", ","))
+    }
+  }, [hydrated])
 
   return (
     <Card size="sm">
