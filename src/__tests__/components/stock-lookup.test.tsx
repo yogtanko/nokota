@@ -52,7 +52,7 @@ describe("StockLookup", () => {
 
     await waitFor(() => {
       const priceInput = screen.getByLabelText(/entry price/i) as HTMLInputElement
-      expect(priceInput.value).toBe("5050")
+      expect(priceInput.value).toBe("5.050")
     })
   })
 
@@ -89,12 +89,12 @@ describe("StockLookup", () => {
 
     await waitFor(() => {
       const priceInput = screen.getByLabelText(/entry price/i) as HTMLInputElement
-      expect(priceInput.value).toBe("5050")
+      expect(priceInput.value).toBe("5.050")
     })
 
     const priceInput = screen.getByLabelText(/entry price/i) as HTMLInputElement
     fireEvent.change(priceInput, { target: { value: "5100" } })
-    expect(priceInput.value).toBe("5100")
+    expect(priceInput.value).toBe("5.100")
   })
 
   it("manual entry works without any stock lookup", () => {
@@ -103,7 +103,7 @@ describe("StockLookup", () => {
     const priceInput = screen.getByLabelText(/entry price/i) as HTMLInputElement
     fireEvent.change(priceInput, { target: { value: "5000" } })
 
-    expect(priceInput.value).toBe("5000")
+    expect(priceInput.value).toBe("5.000")
     expect(mockFetch).not.toHaveBeenCalled()
   })
 

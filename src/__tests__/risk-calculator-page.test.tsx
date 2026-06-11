@@ -83,8 +83,8 @@ describe("Risk Calculator Page", () => {
     const tpInput = screen.getByLabelText(/take profit/i)
     fireEvent.change(tpInput, { target: { value: "5500" } })
 
-    // 50M * 2% = 1M risk / (5000 - 4500 = 500) = 2000 shares
-    expect(screen.getByText("2.000")).toBeInTheDocument()
+    // 50M * 2% = 1M risk / (5000 - 4500 = 500) = 2000 shares = 20 lots
+    expect(screen.getByText(/2\.000/)).toBeInTheDocument()
     expect(screen.getByText(/20 lot/)).toBeInTheDocument()
   })
 
@@ -101,8 +101,8 @@ describe("Risk Calculator Page", () => {
     const tpInput = screen.getByLabelText(/take profit/i)
     fireEvent.change(tpInput, { target: { value: "5500" } })
 
-    expect(screen.getByText("0")).toBeInTheDocument()
     expect(screen.getByText(/0 lots/)).toBeInTheDocument()
+    expect(screen.getByText(/0 shares/)).toBeInTheDocument()
   })
 
   it("shows '0' shares and lots when entry price is below stop loss", () => {
@@ -118,8 +118,8 @@ describe("Risk Calculator Page", () => {
     const tpInput = screen.getByLabelText(/take profit/i)
     fireEvent.change(tpInput, { target: { value: "5500" } })
 
-    expect(screen.getByText("0")).toBeInTheDocument()
     expect(screen.getByText(/0 lots/)).toBeInTheDocument()
+    expect(screen.getByText(/0 shares/)).toBeInTheDocument()
   })
 
   it("shows em-dash for results when balance is zero", () => {

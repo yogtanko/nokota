@@ -76,7 +76,7 @@ export default function RiskCalculatorPage() {
                   type="text"
                   inputMode="numeric"
                   placeholder="0"
-                  value={stopLoss}
+                  value={stopLoss ? Number(stopLoss).toLocaleString("id-ID") : ""}
                   onChange={(e) => {
                     const raw = e.target.value.replace(/\D/g, "")
                     setStopLoss(raw)
@@ -102,7 +102,7 @@ export default function RiskCalculatorPage() {
                   type="text"
                   inputMode="numeric"
                   placeholder="0"
-                  value={takeProfit}
+                  value={takeProfit ? Number(takeProfit).toLocaleString("id-ID") : ""}
                   onChange={(e) => {
                     const raw = e.target.value.replace(/\D/g, "")
                     setTakeProfit(raw)
@@ -130,10 +130,10 @@ export default function RiskCalculatorPage() {
                   Position Size
                 </p>
                 <p className="text-3xl font-bold tabular-nums tracking-tight">
-                  {!hasProfile ? "\u2014" : entryAboveSL ? formatShares(positionSize) : "0"}
+                  {!hasProfile ? "\u2014" : entryAboveSL ? `${formatLots(lots)} lot${lots !== 1 ? "s" : ""}` : "0 lots"}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {!hasProfile ? "\u2014" : entryAboveSL ? `${formatLots(lots)} lot${lots !== 1 ? "s" : ""}` : "0 lots"}
+                  {!hasProfile ? "\u2014" : entryAboveSL ? `${formatShares(positionSize)} shares` : "0 shares"}
                 </p>
               </div>
 

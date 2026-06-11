@@ -72,8 +72,8 @@ test.describe("Risk Calculator — Full User Flow", () => {
     await page.getByLabel(/stop loss/i).fill("4500")
     await page.getByLabel(/take profit/i).fill("5500")
 
-    await expect(page.getByLabel(/stop loss/i)).toHaveValue(/4500/)
-    await expect(page.getByLabel(/take profit/i)).toHaveValue(/5500/)
+    await expect(page.getByLabel(/stop loss/i)).toHaveValue(/4\.500/)
+    await expect(page.getByLabel(/take profit/i)).toHaveValue(/5\.500/)
   })
 
   test("6. calculated results display correctly with valid inputs", async ({

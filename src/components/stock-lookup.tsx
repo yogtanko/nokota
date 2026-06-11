@@ -59,11 +59,11 @@ export default function StockLookup({ entryPrice: controlledPrice, onEntryPriceC
             value={symbol}
             disabled={loading}
             onChange={(e) => {
-              setSymbol(e.target.value)
+              setSymbol(e.target.value.toUpperCase())
               setError(null)
             }}
             onBlur={handleBlur}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 uppercase"
           />
         </div>
         {error && (
@@ -94,7 +94,7 @@ export default function StockLookup({ entryPrice: controlledPrice, onEntryPriceC
             type="text"
             inputMode="numeric"
             placeholder="0"
-            value={entryPrice}
+            value={entryPrice ? Number(entryPrice).toLocaleString("id-ID") : ""}
             disabled={loading}
             onChange={(e) => {
               const raw = e.target.value.replace(/\D/g, "")
