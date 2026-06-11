@@ -6,7 +6,7 @@ test.describe("Risk Calculator — Full User Flow", () => {
   })
 
   test("1. portal page renders with risk calculator link", async ({ page }) => {
-    await expect(page.locator("h1")).toContainText("Trade Deck")
+    await expect(page.locator("h1")).toContainText("Nokota")
     await expect(
       page.getByRole("link", { name: /risk calculator/i })
     ).toBeVisible()
@@ -19,7 +19,7 @@ test.describe("Risk Calculator — Full User Flow", () => {
     page,
   }) => {
     await page.getByRole("link", { name: /risk calculator/i }).click()
-    await expect(page).toHaveURL(/\/apps\/risk-calculator/)
+    await expect(page).toHaveURL(/\/apps\/trade-deck\/risk-calculator/)
     await expect(
       page.getByRole("heading", { name: /risk calculator/i })
     ).toBeVisible()
@@ -29,7 +29,7 @@ test.describe("Risk Calculator — Full User Flow", () => {
     page,
   }) => {
     await page.getByRole("link", { name: /risk calculator/i }).click()
-    await page.waitForURL(/\/apps\/risk-calculator/)
+    await page.waitForURL(/\/apps\/trade-deck\/risk-calculator/)
 
     const balanceInput = page.getByLabel(/account balance/i)
     await balanceInput.fill("50000000")
@@ -44,7 +44,7 @@ test.describe("Risk Calculator — Full User Flow", () => {
     page,
   }) => {
     await page.getByRole("link", { name: /risk calculator/i }).click()
-    await page.waitForURL(/\/apps\/risk-calculator/)
+    await page.waitForURL(/\/apps\/trade-deck\/risk-calculator/)
 
     const symbolInput = page.getByLabel(/stock symbol/i)
     await symbolInput.fill("BBRI")
@@ -63,7 +63,7 @@ test.describe("Risk Calculator — Full User Flow", () => {
     page,
   }) => {
     await page.getByRole("link", { name: /risk calculator/i }).click()
-    await page.waitForURL(/\/apps\/risk-calculator/)
+    await page.waitForURL(/\/apps\/trade-deck\/risk-calculator/)
 
     await page.getByLabel(/account balance/i).fill("50000000")
     await page.getByLabel(/risk per trade/i).fill("2")
@@ -80,7 +80,7 @@ test.describe("Risk Calculator — Full User Flow", () => {
     page,
   }) => {
     await page.getByRole("link", { name: /risk calculator/i }).click()
-    await page.waitForURL(/\/apps\/risk-calculator/)
+    await page.waitForURL(/\/apps\/trade-deck\/risk-calculator/)
 
     await page.getByLabel(/account balance/i).fill("50000000")
     await page.getByLabel(/risk per trade/i).fill("2")
@@ -104,7 +104,7 @@ test.describe("Risk Calculator — Full User Flow", () => {
     page,
   }) => {
     await page.getByRole("link", { name: /risk calculator/i }).click()
-    await page.waitForURL(/\/apps\/risk-calculator/)
+    await page.waitForURL(/\/apps\/trade-deck\/risk-calculator/)
 
     await page.getByLabel(/account balance/i).fill("50000000")
     await page.getByLabel(/risk per trade/i).fill("2")
@@ -125,14 +125,14 @@ test.describe("Risk Calculator — Full User Flow", () => {
 
   test("8. profile values persist after page refresh", async ({ page }) => {
     await page.getByRole("link", { name: /risk calculator/i }).click()
-    await page.waitForURL(/\/apps\/risk-calculator/)
+    await page.waitForURL(/\/apps\/trade-deck\/risk-calculator/)
 
     await page.getByLabel(/account balance/i).fill("100000000")
     await page.getByLabel(/risk per trade/i).fill("3")
     await page.waitForTimeout(500)
 
     await page.reload()
-    await page.waitForURL(/\/apps\/risk-calculator/)
+    await page.waitForURL(/\/apps\/trade-deck\/risk-calculator/)
     await page.waitForTimeout(500)
 
     const balanceInput = page.getByLabel(/account balance/i)
