@@ -4,11 +4,11 @@ A trader needs a centralized portal for financial market tools, starting with a 
 
 ## Solution
 
-Trade Deck — a monolithic Next.js portal serving as the hub for all financial market applications. The first application is a Trading Risk Calculator that combines position sizing with Risk/Reward analysis, live stock price lookup from Yahoo Finance, persistent account profile via localStorage, and real-time reactive calculations.
+Nokota — a monolithic Next.js portal serving as the hub for personal tools and experiments. It is organized into categories, each containing related applications. The first category is **Trade Deck**, which starts with a Trading Risk Calculator that combines position sizing with Risk/Reward analysis, live stock price lookup from Yahoo Finance, persistent account profile via localStorage, and real-time reactive calculations.
 
 ## User Stories
 
-1. As a trader, I want to open Trade Deck in a browser, so that I can access financial market tools without installing software.
+1. As a visitor, I want to open Nokota in a browser, so that I can access personal tools and experiments.
 2. As a trader, I want to see a portal landing page with links to all available apps, so that I can navigate between tools easily.
 3. As a trader, I want to save my account balance, so that it persists across sessions.
 4. As a trader, I want to save my default risk percentage per trade, so that I don't re-enter it every session.
@@ -33,7 +33,7 @@ Trade Deck — a monolithic Next.js portal serving as the hub for all financial 
 
 ## Implementation Decisions
 
-- **Architecture**: Single Next.js monolith with App Router. Route groups separate portal layout from app layouts. Each application lives in its own route group under the apps namespace.
+- **Architecture**: Single Next.js monolith with App Router. Route groups separate portal layout from app layouts. Applications are organized by category under the apps namespace (e.g., `/apps/trade-deck/risk-calculator`).
 - **UI Framework**: Tailwind CSS with shadcn/ui components for consistent, professional styling with full customizability, --preset b397UdYWv.
 - **State Management**: Zustand with `persist` middleware stores account profile (balance, risk percentage) in localStorage. Calculator inputs (symbol, entry price, stop loss, take profit) use local component state and are not persisted.
 - **Stock Data**: Yahoo Finance via the `yahoo-finance2` package, proxied through a Next.js API route. The `.JK` suffix is auto-appended for IDX stocks. Entry price auto-fills from lookup but remains manually editable.
