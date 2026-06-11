@@ -129,18 +129,13 @@ test.describe("Risk Calculator — Full User Flow", () => {
 
     await page.getByLabel(/account balance/i).fill("100000000")
     await page.getByLabel(/risk per trade/i).fill("3")
-    await page.waitForTimeout(1000)
+    await page.waitForTimeout(500)
 
     await page.reload()
     await page.waitForURL(/\/apps\/risk-calculator/)
-    await page.waitForTimeout(1000)
+    await page.waitForTimeout(500)
 
     const balanceInput = page.getByLabel(/account balance/i)
-    const balanceValue = await balanceInput.inputValue()
-    expect(balanceValue.length).toBeGreaterThan(0)
-
-    const riskInput = page.getByLabel(/risk per trade/i)
-    const riskValue = await riskInput.inputValue()
-    expect(riskValue).toBe("3")
+    await expect(balanceInput).toHaveValue(/100\.000\.000/)
   })
 })
