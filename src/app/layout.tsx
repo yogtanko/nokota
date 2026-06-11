@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 const dmSans = DM_Sans({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: "Trade Deck",
-  description: "A centralized portal for financial market tools",
+  title: "Nokota",
+  description: "Personal tools & experiments",
 };
 
 export default function RootLayout({

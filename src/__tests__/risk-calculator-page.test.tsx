@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react"
-import RiskCalculatorPage from "@/app/(app)/apps/risk-calculator/page"
+import RiskCalculatorPage from "@/app/(app)/apps/trade-deck/risk-calculator/page"
 import { useAccountProfile } from "@/store/account-profile"
 
 describe("Risk Calculator Page", () => {
