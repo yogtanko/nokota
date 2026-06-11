@@ -110,4 +110,41 @@ describe("Profile Section", () => {
     expect(riskInput.value).toBe("0,5")
     expect(useAccountProfile.getState().riskPercent).toBe(0.005)
   })
+
+  it("caps risk percent at 100 when value exceeds 100", () => {
+    render(<ProfileSection />)
+
+    const riskInput = screen.getByLabelText(/risk per trade/i) as HTMLInputElement
+    fireEvent.change(riskInput, { target: { value: "150" } })
+
+    expect(riskInput.value).toBe("100")
+    expect(useAccountProfile.getState().riskPercent).toBe(1)
+  })
+
+  it("allows risk percent of exactly 100", () => {
+    render(<ProfileSection />)
+
+    const riskInput = screen.getByLabelText(/risk per trade/i)
+    fireEvent.change(riskInput, { target: { value: "100" } })
+
+    expect(useAccountProfile.getState().riskPercent).toBe(1)
+  })
+
+  it("allows risk percent of 0", () => {
+    render(<ProfileSection />)
+
+    const riskInput = screen.getByLabelText(/risk per trade/i)
+    fireEvent.change(riskInput, { target: { value: "0" } })
+
+    expect(useAccountProfile.getState().riskPercent).toBe(0)
+  })
+
+  it("does not cap normal values below 100", () => {
+    render(<ProfileSection />)
+
+    const riskInput = screen.getByLabelText(/risk per trade/i)
+    fireEvent.change(riskInput, { target: { value: "50" } })
+
+    expect(useAccountProfile.getState().riskPercent).toBe(0.5)
+  })
 })

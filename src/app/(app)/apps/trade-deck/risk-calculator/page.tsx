@@ -44,7 +44,6 @@ export default function RiskCalculatorPage() {
   const hasStopLoss = stopLoss !== ""
   const entryAboveSL = entry > sl && hasEntry && hasStopLoss
   const hasProfile = balance > 0 && riskPercent > 0
-
   const autoFillTakeProfit = (entryVal: number, slVal: number) => {
     if (tpManuallyEdited.current) return
     if (entryVal <= 0 || slVal <= 0 || entryVal <= slVal) return

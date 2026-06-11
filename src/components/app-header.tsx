@@ -3,11 +3,12 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { getAllApps } from "@/config/apps"
+import { categories } from "@/config/apps"
+import { DropdownMenu } from "radix-ui"
+import { IconChevronDown } from "@tabler/icons-react"
 
 export default function AppHeader() {
   const pathname = usePathname()
-  const apps = getAllApps()
 
   return (
     <header className="border-b">
@@ -21,22 +22,63 @@ export default function AppHeader() {
         </Link>
 
         <nav className="flex items-center gap-1">
-          {apps.map((app) => {
-            const isActive = pathname.startsWith(app.path)
+          {categories.map((category) => {
+            const isCategoryActive = category.apps.some(
+              (app) =>
+                pathname === `/apps/${category.id}/${app.id}` ||
+                pathname.startsWith(`/apps/${category.id}/${app.id}/`)
+            )
 
             return (
-              <Link
-                key={`${app.path}`}
-                href={app.path}
-                className={cn(
-                  "px-3 py-1.5 text-sm rounded-full transition-colors",
-                  isActive
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {app.name}
-              </Link>
+              <DropdownMenu.Root key={category.id}>
+                <DropdownMenu.Trigger asChild>
+                  <button
+                    className={cn(
+                      "group flex items-center gap-1 px-3 py-1.5 text-sm rounded-full transition-colors",
+                      isCategoryActive
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {category.name}
+                    <IconChevronDown
+                      size={14}
+                      className="transition-transform duration-200 group-data-[state=open]:rotate-180"
+                    />
+                  </button>
+                </DropdownMenu.Trigger>
+
+                <DropdownMenu.Portal>
+                  <DropdownMenu.Content
+                    className="DropdownMenuContent min-w-[180px] rounded-xl bg-card p-1.5 shadow-lg ring-1 ring-border"
+                    sideOffset={6}
+                    align="start"
+                  >
+                    {category.apps.map((app) => {
+                      const appPath = `/apps/${category.id}/${app.id}`
+                      const isActive =
+                        pathname === appPath ||
+                        pathname.startsWith(`${appPath}/`)
+
+                      return (
+                        <DropdownMenu.Item key={app.id} asChild>
+                          <Link
+                            href={appPath}
+                            className={cn(
+                              "flex items-center gap-2 rounded-lg px-3 py-2 text-sm outline-none transition-colors",
+                              isActive
+                                ? "bg-primary/10 text-primary font-medium"
+                                : "text-foreground hover:bg-muted"
+                            )}
+                          >
+                            {app.name}
+                          </Link>
+                        </DropdownMenu.Item>
+                      )
+                    })}
+                  </DropdownMenu.Content>
+                </DropdownMenu.Portal>
+              </DropdownMenu.Root>
             )
           })}
         </nav>

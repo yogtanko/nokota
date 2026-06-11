@@ -92,6 +92,9 @@ export default function ProfileSection() {
                   const parsed = raw.replace(",", ".")
                   if (parsed === "" || parsed === ".") {
                     setRiskPercent(0)
+                  } else if (Number(parsed) > 100) {
+                    setRiskPercent(1)
+                    setRiskText("100")
                   } else {
                     setRiskPercent(Number(parsed) / 100)
                   }
