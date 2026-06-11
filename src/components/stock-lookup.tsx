@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback } from "react"
+import { useCursorFix } from "@/hooks/use-cursor-fix"
 
 interface StockLookupProps {
   entryPrice?: string
@@ -16,6 +17,7 @@ export default function StockLookup({ entryPrice: controlledPrice, onEntryPriceC
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [lastLookedUp, setLastLookedUp] = useState<string | null>(null)
+  const { ref: priceRef, preserveCursor } = useCursorFix()
 
   const handleBlur = useCallback(async () => {
     const trimmed = symbol.trim()
@@ -92,12 +94,14 @@ export default function StockLookup({ entryPrice: controlledPrice, onEntryPriceC
           </span>
           <input
             id="entry-price"
+            ref={priceRef}
             type="text"
             inputMode="numeric"
             placeholder="0"
             value={entryPrice ? Number(entryPrice).toLocaleString("id-ID") : ""}
             disabled={loading}
             onChange={(e) => {
+              preserveCursor(e)
               const raw = e.target.value.replace(/\D/g, "")
               setEntryPrice(raw)
               setLastLookedUp(null)

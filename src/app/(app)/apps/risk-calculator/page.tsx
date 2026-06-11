@@ -4,6 +4,7 @@ import { useState, useRef } from "react"
 import { useAccountProfile } from "@/store/account-profile"
 import ProfileSection from "@/components/profile-section"
 import StockLookup from "@/components/stock-lookup"
+import { useCursorFix } from "@/hooks/use-cursor-fix"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   calculatePositionSize,
@@ -25,6 +26,8 @@ export default function RiskCalculatorPage() {
   const [stopLoss, setStopLoss] = useState("")
   const [takeProfit, setTakeProfit] = useState("")
   const tpManuallyEdited = useRef(false)
+  const { ref: slRef, preserveCursor: preserveSlCursor } = useCursorFix()
+  const { ref: tpRef, preserveCursor: preserveTpCursor } = useCursorFix()
 
   const entry = Number(entryPrice)
   const sl = Number(stopLoss)
@@ -86,11 +89,13 @@ export default function RiskCalculatorPage() {
                     </span>
                     <input
                       id="stop-loss"
+                      ref={slRef}
                       type="text"
                       inputMode="numeric"
                       placeholder="0"
                       value={stopLoss ? Number(stopLoss).toLocaleString("id-ID") : ""}
                       onChange={(e) => {
+                        preserveSlCursor(e)
                         const raw = e.target.value.replace(/\D/g, "")
                         setStopLoss(raw)
                         autoFillTakeProfit(entry, Number(raw))
@@ -113,11 +118,13 @@ export default function RiskCalculatorPage() {
                     </span>
                     <input
                       id="take-profit"
+                      ref={tpRef}
                       type="text"
                       inputMode="numeric"
                       placeholder="0"
                       value={takeProfit ? Number(takeProfit).toLocaleString("id-ID") : ""}
                       onChange={(e) => {
+                        preserveTpCursor(e)
                         const raw = e.target.value.replace(/\D/g, "")
                         setTakeProfit(raw)
                         tpManuallyEdited.current = raw !== ""
