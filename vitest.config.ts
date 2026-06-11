@@ -18,6 +18,7 @@ export default defineConfig({
         "src/lib/utils.ts",
         "src/app/globals.css",
         "src/**/layout.tsx",
+        "e2e/**",
       ],
       thresholds: {
         branches: 80,

@@ -2,9 +2,17 @@
 
 import { useState, useCallback } from "react"
 
-export default function StockLookup() {
+interface StockLookupProps {
+  entryPrice?: string
+  onEntryPriceChange?: (value: string) => void
+}
+
+export default function StockLookup({ entryPrice: controlledPrice, onEntryPriceChange }: StockLookupProps) {
   const [symbol, setSymbol] = useState("")
-  const [entryPrice, setEntryPrice] = useState("")
+  const [internalPrice, setInternalPrice] = useState("")
+
+  const entryPrice = controlledPrice !== undefined ? controlledPrice : internalPrice
+  const setEntryPrice = onEntryPriceChange || setInternalPrice
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [lastLookedUp, setLastLookedUp] = useState<string | null>(null)
