@@ -47,14 +47,14 @@ export default function ProfileSection() {
                 type="text"
                 inputMode="numeric"
                 value={balance > 0 ? balance.toLocaleString("id-ID") : ""}
-                onChange={(e) => {
-                  const raw = e.target.value.replace(/\D/g, "")
-                  if (raw === "") {
-                    setBalance(0)
-                  } else {
-                    setBalance(Number(raw))
-                  }
-                }}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/\D/g, "")
+                    if (raw === "") {
+                      setBalance(0)
+                    } else {
+                      setBalance(Math.min(Number(raw), 1_000_000_000_000))
+                    }
+                  }}
                 className="flex h-9 w-full rounded-md border border-input bg-transparent pl-8 pr-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>

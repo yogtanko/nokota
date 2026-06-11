@@ -1,5 +1,11 @@
 import Link from "next/link"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { apps } from "@/config/apps"
+import { IconCalculator } from "@tabler/icons-react"
+
+const appIcons: Record<string, React.ReactNode> = {
+  "risk-calculator": <IconCalculator size={20} />,
+}
 
 export default function PortalPage() {
   return (
@@ -9,16 +15,23 @@ export default function PortalPage() {
         Your centralized hub for financial market tools
       </p>
       <div className="grid gap-4 w-full max-w-sm">
-        <Link href="/apps/risk-calculator">
-          <Card className="transition-colors hover:bg-muted/50">
-            <CardHeader>
-              <CardTitle>Risk Calculator</CardTitle>
-              <CardDescription>
-                Calculate position sizing and risk/reward ratio for your trades
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </Link>
+        {apps.map((app) => (
+          <Link key={app.id} href={app.path}>
+            <Card className="transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:bg-muted/50">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  {appIcons[app.id] && (
+                    <span className="text-primary shrink-0">{appIcons[app.id]}</span>
+                  )}
+                  <div>
+                    <CardTitle>{app.name}</CardTitle>
+                    <CardDescription>{app.description}</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
+        ))}
       </div>
     </div>
   )

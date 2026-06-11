@@ -21,6 +21,7 @@ export default function StockLookup({ entryPrice: controlledPrice, onEntryPriceC
     const trimmed = symbol.trim()
     if (!trimmed) return
 
+    setLastLookedUp(null)
     setLoading(true)
     setError(null)
 

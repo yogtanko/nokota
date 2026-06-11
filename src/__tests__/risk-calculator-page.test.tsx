@@ -45,9 +45,12 @@ describe("Risk Calculator Page", () => {
     expect(screen.getByLabelText(/take profit/i)).toBeInTheDocument()
   })
 
-  it("shows placeholder without trade inputs - no Results card", () => {
+  it("shows Results panel with placeholder dashes when no trade inputs", () => {
     render(<RiskCalculatorPage />)
-    expect(screen.queryByText("Results")).not.toBeInTheDocument()
+    expect(screen.getByText("Results")).toBeInTheDocument()
+    expect(screen.getByText("Position Size")).toBeInTheDocument()
+    const dashes = screen.getAllByText("\u2014")
+    expect(dashes.length).toBeGreaterThanOrEqual(3)
   })
 
   it("shows Results card when all trade inputs are filled", () => {
@@ -120,6 +123,41 @@ describe("Risk Calculator Page", () => {
 
     expect(screen.getByText(/0 lots/)).toBeInTheDocument()
     expect(screen.getByText(/0 shares/)).toBeInTheDocument()
+  })
+
+  it("shows purchase cost formatted in rupiah for valid inputs", () => {
+    useAccountProfile.getState().setBalance(50_000_000)
+    render(<RiskCalculatorPage />)
+
+    const entryInput = screen.getByLabelText(/entry price/i)
+    fireEvent.change(entryInput, { target: { value: "5000" } })
+
+    const slInput = screen.getByLabelText(/stop loss/i)
+    fireEvent.change(slInput, { target: { value: "4500" } })
+
+    const tpInput = screen.getByLabelText(/take profit/i)
+    fireEvent.change(tpInput, { target: { value: "5500" } })
+
+    // 20 lots × 100 × 5000 = Rp 10.000.000
+    expect(screen.getByText("Purchase Cost")).toBeInTheDocument()
+    expect(screen.getByText(/10\.000\.000/)).toBeInTheDocument()
+  })
+
+  it("shows em-dash for purchase cost when balance is zero", () => {
+    useAccountProfile.getState().setBalance(0)
+    render(<RiskCalculatorPage />)
+
+    const entryInput = screen.getByLabelText(/entry price/i)
+    fireEvent.change(entryInput, { target: { value: "5000" } })
+
+    const slInput = screen.getByLabelText(/stop loss/i)
+    fireEvent.change(slInput, { target: { value: "4500" } })
+
+    const tpInput = screen.getByLabelText(/take profit/i)
+    fireEvent.change(tpInput, { target: { value: "5500" } })
+
+    const purchaseCol = screen.getByText("Purchase Cost").closest("div")!
+    expect(purchaseCol.textContent).toContain("\u2014")
   })
 
   it("shows em-dash for results when balance is zero", () => {

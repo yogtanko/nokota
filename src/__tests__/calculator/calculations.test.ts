@@ -4,6 +4,7 @@ import {
   calculateRiskRewardRatio,
   calculatePotentialProfit,
   calculatePotentialLoss,
+  calculatePurchaseCost,
 } from "@/lib/calculator/calculations"
 import { LOT_SIZE } from "@/lib/calculator/constants"
 
@@ -124,6 +125,39 @@ describe("calculatePotentialProfit", () => {
   it("handles large profits", () => {
     const result = calculatePotentialProfit(10000, 1000, 100_000)
     expect(result).toBe(900_000_000)
+  })
+})
+
+describe("calculatePurchaseCost", () => {
+  it("returns correct purchase cost for valid lots and entry price", () => {
+    const result = calculatePurchaseCost(12, 5000)
+    expect(result).toBe(6_000_000)
+  })
+
+  it("returns 0 for zero lots", () => {
+    expect(calculatePurchaseCost(0, 5000)).toBe(0)
+  })
+
+  it("returns 0 for zero entry price", () => {
+    expect(calculatePurchaseCost(12, 0)).toBe(0)
+  })
+
+  it("floors fractional lots before computing cost", () => {
+    const result = calculatePurchaseCost(3.2, 2000)
+    expect(result).toBe(600_000)
+  })
+
+  it("returns 0 for negative lots", () => {
+    expect(calculatePurchaseCost(-5, 5000)).toBe(0)
+  })
+
+  it("returns 0 for negative entry price", () => {
+    expect(calculatePurchaseCost(12, -100)).toBe(0)
+  })
+
+  it("accepts custom lot size", () => {
+    const result = calculatePurchaseCost(10, 5000, 50)
+    expect(result).toBe(2_500_000)
   })
 })
 
