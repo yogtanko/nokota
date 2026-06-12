@@ -6,6 +6,7 @@ export {
   calculatePotentialProfit,
   calculatePotentialLoss,
   calculatePurchaseCost,
+  calculateMaxAffordableShares,
 } from "./calculations"
 export {
   formatCurrency,

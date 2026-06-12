@@ -13,6 +13,7 @@ import {
   calculatePotentialProfit,
   calculatePotentialLoss,
   calculatePurchaseCost,
+  calculateMaxAffordableShares,
   formatCurrency,
   formatShares,
   formatLots,
@@ -33,17 +34,22 @@ export default function RiskCalculatorPage() {
   const sl = Number(stopLoss)
   const tp = Number(takeProfit)
 
-  const positionSize = calculatePositionSize(balance, riskPercent * 100, entry, sl)
-  const lots = calculateLots(positionSize)
-  const rr = calculateRiskRewardRatio(entry, sl, tp)
-  const profit = calculatePotentialProfit(tp, entry, positionSize)
-  const loss = calculatePotentialLoss(entry, sl, positionSize)
-  const cost = calculatePurchaseCost(lots, entry)
+  const riskBasedShares = calculatePositionSize(balance, riskPercent * 100, entry, sl)
+  const riskBasedLots = calculateLots(riskBasedShares)
+  const riskBasedCost = calculatePurchaseCost(riskBasedLots, entry)
 
   const hasEntry = entryPrice !== ""
   const hasStopLoss = stopLoss !== ""
   const entryAboveSL = entry > sl && hasEntry && hasStopLoss
   const hasProfile = balance > 0 && riskPercent > 0
+
+  const isCapped = hasProfile && entryAboveSL && riskBasedCost > balance
+  const shares = isCapped ? calculateMaxAffordableShares(balance, entry) : riskBasedShares
+  const lots = calculateLots(shares)
+  const rr = calculateRiskRewardRatio(entry, sl, tp)
+  const profit = calculatePotentialProfit(tp, entry, shares)
+  const loss = calculatePotentialLoss(entry, sl, shares)
+  const cost = calculatePurchaseCost(lots, entry)
   const autoFillTakeProfit = (entryVal: number, slVal: number) => {
     if (tpManuallyEdited.current) return
     if (entryVal <= 0 || slVal <= 0 || entryVal <= slVal) return
@@ -155,7 +161,7 @@ export default function RiskCalculatorPage() {
                   {!hasProfile ? "\u2014" : entryAboveSL ? `${formatLots(lots)} lot${lots !== 1 ? "s" : ""}` : "0 lots"}
                 </p>
                 <p className="text-base text-muted-foreground mt-1.5 transition-all duration-200">
-                  {!hasProfile ? "\u2014" : entryAboveSL ? `${formatShares(positionSize)} shares` : "0 shares"}
+                  {!hasProfile ? "\u2014" : entryAboveSL ? `${formatShares(shares)} shares` : "0 shares"}
                 </p>
               </div>
               <div className="min-w-0">

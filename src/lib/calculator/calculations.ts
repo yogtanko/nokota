@@ -44,6 +44,17 @@ export function calculatePurchaseCost(
   return Math.floor(lots) * lotSize * entryPrice
 }
 
+export function calculateMaxAffordableShares(
+  balance: number,
+  entryPrice: number,
+  lotSize: number = LOT_SIZE,
+): number {
+  if (balance <= 0 || entryPrice <= 0 || lotSize <= 0) return 0
+  const maxShares = Math.floor(balance / entryPrice)
+  const lots = Math.floor(maxShares / lotSize)
+  return lots * lotSize
+}
+
 export function calculatePotentialLoss(
   entryPrice: number,
   stopLoss: number,
