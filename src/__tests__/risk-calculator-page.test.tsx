@@ -215,5 +215,21 @@ describe("Risk Calculator Page", () => {
     expect(screen.getByText("1:1.0")).toBeInTheDocument()
   })
 
+  it("shows max loss value when stop loss is zero", () => {
+    useAccountProfile.getState().setBalance(50_000_000)
+    render(<RiskCalculatorPage />)
 
+    const entryInput = screen.getByLabelText(/entry price/i)
+    fireEvent.change(entryInput, { target: { value: "5000" } })
+
+    const slInput = screen.getByLabelText(/stop loss/i)
+    fireEvent.change(slInput, { target: { value: "0" } })
+
+    const tpInput = screen.getByLabelText(/take profit/i)
+    fireEvent.change(tpInput, { target: { value: "5500" } })
+
+    // Max Loss should show a value, not an em-dash
+    const maxLossEl = screen.getByText("Max Loss").closest("div")!
+    expect(maxLossEl.textContent).not.toContain("\u2014")
+  })
 })

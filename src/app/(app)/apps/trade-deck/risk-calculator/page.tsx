@@ -190,7 +190,7 @@ export default function RiskCalculatorPage() {
                   Max Loss
                 </p>
                 <p className="text-2xl md:text-3xl font-bold tabular-nums text-destructive whitespace-normal break-words transition-all duration-200">
-                  {!hasProfile || !entryAboveSL || sl <= 0 || loss <= 0 ? "\u2014" : `\u2212${formatCurrency(loss)}`}
+                  {!hasProfile || !entryAboveSL || sl < 0 || loss <= 0 ? "\u2014" : `\u2212${formatCurrency(loss)}`}
                 </p>
               </div>
               <div className="col-span-2 min-w-0">
