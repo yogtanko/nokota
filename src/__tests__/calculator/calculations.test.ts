@@ -5,6 +5,7 @@ import {
   calculatePotentialProfit,
   calculatePotentialLoss,
   calculatePurchaseCost,
+  calculateMaxAffordableShares,
 } from "@/lib/calculator/calculations"
 import { LOT_SIZE } from "@/lib/calculator/constants"
 
@@ -158,6 +159,44 @@ describe("calculatePurchaseCost", () => {
   it("accepts custom lot size", () => {
     const result = calculatePurchaseCost(10, 5000, 50)
     expect(result).toBe(2_500_000)
+  })
+})
+
+describe("calculateMaxAffordableShares", () => {
+  it("returns max affordable shares when balance exceeds entry price", () => {
+    const result = calculateMaxAffordableShares(5_000_000, 5000)
+    expect(result).toBe(1000)
+  })
+
+  it("returns 0 when balance is zero", () => {
+    expect(calculateMaxAffordableShares(0, 5000)).toBe(0)
+  })
+
+  it("returns 0 when entry price is zero", () => {
+    expect(calculateMaxAffordableShares(5_000_000, 0)).toBe(0)
+  })
+
+  it("returns 0 when balance cannot afford a single lot", () => {
+    expect(calculateMaxAffordableShares(50_000, 5000)).toBe(0)
+  })
+
+  it("rounds down to nearest lot", () => {
+    const result = calculateMaxAffordableShares(5_050_000, 5000)
+    expect(result).toBe(1000)
+  })
+
+  it("handles large values", () => {
+    const result = calculateMaxAffordableShares(1_000_000_000, 5000)
+    expect(result).toBe(200_000)
+  })
+
+  it("returns 0 for negative balance", () => {
+    expect(calculateMaxAffordableShares(-1000, 5000)).toBe(0)
+  })
+
+  it("accepts custom lot size", () => {
+    const result = calculateMaxAffordableShares(500_000, 5000, 50)
+    expect(result).toBe(100)
   })
 })
 

@@ -194,4 +194,26 @@ describe("Risk Calculator Page", () => {
     const dashes = screen.getAllByText("\u2014")
     expect(dashes.length).toBeGreaterThanOrEqual(3)
   })
+
+  it("caps position size when purchase cost exceeds balance", () => {
+    useAccountProfile.getState().setBalance(5_000_000)
+    useAccountProfile.getState().setRiskPercent(0.30)
+    render(<RiskCalculatorPage />)
+
+    const entryInput = screen.getByLabelText(/entry price/i)
+    fireEvent.change(entryInput, { target: { value: "5000" } })
+
+    const slInput = screen.getByLabelText(/stop loss/i)
+    fireEvent.change(slInput, { target: { value: "4900" } })
+
+    const tpInput = screen.getByLabelText(/take profit/i)
+    fireEvent.change(tpInput, { target: { value: "5100" } })
+
+    expect(screen.getByText(/10 lot/)).toBeInTheDocument()
+    expect(screen.getByText(/1\.000 shares/)).toBeInTheDocument()
+    expect(screen.getByText(/5\.000\.000/)).toBeInTheDocument()
+    expect(screen.getByText("1:1.0")).toBeInTheDocument()
+  })
+
+
 })

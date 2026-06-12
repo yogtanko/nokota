@@ -123,6 +123,28 @@ test.describe("Risk Calculator — Full User Flow", () => {
     await expect(page.getByText(/14 lot/).or(page.getByText(/10 lot/))).toBeVisible()
   })
 
+  test("9. caps position size when purchase cost exceeds balance", async ({
+    page,
+  }) => {
+    await page.getByRole("link", { name: /risk calculator/i }).click()
+    await page.waitForURL(/\/apps\/trade-deck\/risk-calculator/)
+
+    await page.getByLabel(/account balance/i).fill("5000000")
+    await page.getByLabel(/risk per trade/i).fill("30")
+    await page.getByLabel(/entry price/i).fill("5000")
+    await page.getByLabel(/stop loss/i).fill("4900")
+    await page.getByLabel(/take profit/i).fill("5100")
+
+    await page.waitForTimeout(500)
+
+    // Capped values: 10 lots / 1.000 shares (not 150 lots / 15.000 shares)
+    await expect(page.getByText(/10 lot/)).toBeVisible()
+    await expect(page.getByText(/1\.000 shares/)).toBeVisible()
+
+    // R:R unchanged (independent of position size)
+    await expect(page.getByText("1:1.0")).toBeVisible()
+  })
+
   test("8. profile values persist after page refresh", async ({ page }) => {
     await page.getByRole("link", { name: /risk calculator/i }).click()
     await page.waitForURL(/\/apps\/trade-deck\/risk-calculator/)
