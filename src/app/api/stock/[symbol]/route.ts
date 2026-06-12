@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import YahooFinance from "yahoo-finance2"
+import { getRedis } from "@/lib/redis"
 
 const yahooFinance = new YahooFinance()
+const CACHE_TTL = 60
 
 export async function GET(
   _request: NextRequest,
@@ -14,6 +16,17 @@ export async function GET(
   }
 
   const query = `${symbol.trim().toUpperCase()}.JK`
+  const cacheKey = `stock:${query}`
+
+  const redis = getRedis()
+  if (redis) {
+    try {
+      const cached = await redis.get<{ price: number; symbol: string }>(cacheKey)
+      if (cached) return NextResponse.json(cached)
+    } catch {
+      // Redis unavailable — fall through to Yahoo
+    }
+  }
 
   try {
     const quotes = await yahooFinance.quote(query)
@@ -26,10 +39,16 @@ export async function GET(
       )
     }
 
-    return NextResponse.json({
+    const data = {
       price: quote.regularMarketPrice,
       symbol: symbol.trim().toUpperCase(),
-    })
+    }
+
+    if (redis) {
+      redis.set(cacheKey, data, { ex: CACHE_TTL }).catch(() => {})
+    }
+
+    return NextResponse.json(data)
   } catch {
     return NextResponse.json(
       { error: "Stock price service unavailable. Please try again later." },
