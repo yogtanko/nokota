@@ -13,10 +13,15 @@ vi.mock("@/components/rrg-skeleton", () => ({
   RRGSkeleton: () => <div data-testid="rrg-skeleton">Loading...</div>,
 }))
 
+vi.mock("@/components/rrg-coming-soon", () => ({
+  RRGComingSoon: () => <div data-testid="rrg-coming-soon">Work in progress</div>,
+}))
+
 const mockResponse = {
   timeframe: "daily",
   computed_at: new Date().toISOString(),
   stale: false,
+  dataAvailable: true,
   sectors: [
     { ticker: "IDXENERGY.JK", name: "Energy", rsRatio: 105, rsMomentum: 110, quadrant: "LEADING", tail: [] },
     { ticker: "IDXBASIC.JK", name: "Basic Materials", rsRatio: 98, rsMomentum: 92, quadrant: "LAGGING", tail: [] },
@@ -84,6 +89,17 @@ describe("SektorTrend Page", () => {
     await waitFor(() => {
       expect(screen.getByTestId("rrg-chart")).toHaveTextContent("11 sectors")
       expect(screen.getByTestId("rrg-table")).toHaveTextContent("11 sectors")
+    })
+  })
+
+  it("shows coming-soon when dataAvailable is false", async () => {
+    mockSwrReturn = {
+      ...mockSwrReturn,
+      data: { ...mockResponse, dataAvailable: false, sectors: [] },
+    }
+    render(<SectorTrendPage />)
+    await waitFor(() => {
+      expect(screen.getByTestId("rrg-coming-soon")).toBeInTheDocument()
     })
   })
 
