@@ -1,8 +1,8 @@
 import { Quadrant, RRGResult, RRGTimeframe, TailPoint } from "./types"
 
 const RRG_CONFIG = {
-  daily: { emaPeriod: 21, rocPeriod: 8 },
-  weekly: { emaPeriod: 55, rocPeriod: 21 },
+  daily: { emaPeriod: 21, rocPeriod: 8, zScoreWindow: 20 },
+  weekly: { emaPeriod: 55, rocPeriod: 21, zScoreWindow: 20 },
 } as const
 
 export function computeRawRSRatio(
@@ -130,11 +130,11 @@ export function computeRRG(
   const raw = computeRawRSRatio(sectorCloses, ihsgCloses)
   const smoothed = ema(raw, config.emaPeriod)
   const momentumRaw = roc(smoothed, config.rocPeriod)
-  const momentumZScores = zScore(momentumRaw, 50)
+  const momentumZScores = zScore(momentumRaw, config.zScoreWindow)
   const momentumNorm = normalizeMomentum(momentumZScores)
 
-  const rsRatio = lastValid(smoothed)
-  const rsMomentum = lastValid(momentumNorm)
+  const rsRatio = isNaN(lastValid(smoothed)) ? 100 : lastValid(smoothed)
+  const rsMomentum = isNaN(lastValid(momentumNorm)) ? 100 : lastValid(momentumNorm)
 
   const quadrant = mapQuadrant(rsRatio, rsMomentum)
   const tail = computeTail(smoothed, momentumNorm)

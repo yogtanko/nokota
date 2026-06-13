@@ -29,6 +29,8 @@ export async function fetchSectorOHLCV(
   for (const result of results) {
     if (result.status === "fulfilled") {
       map.set(result.value.ticker, result.value.closes)
+    } else {
+      console.warn(`[sector-data] Failed to fetch chart for a ticker:`, result.reason)
     }
   }
 
