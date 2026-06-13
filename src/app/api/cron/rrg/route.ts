@@ -21,7 +21,7 @@ function todayStr(): string {
 
 async function backfillIhsg(
   period1: Date,
-  yf: YahooFinance,
+  yf: InstanceType<typeof YahooFinance>,
 ): Promise<void> {
   const chart = await yf.chart("^JKSE", {
     period1,
@@ -100,6 +100,7 @@ export async function POST(request: Request) {
       timeframe: "daily",
       computed_at: new Date().toISOString(),
       stale: false,
+      dataAvailable: true,
       sectors,
     }
 
