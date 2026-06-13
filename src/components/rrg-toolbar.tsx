@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import type { RRGTimeframe } from "@/lib/rrg/types"
-import { cn } from "@/lib/utils"
-import { IconClock } from "@tabler/icons-react"
+import type { RRGTimeframe } from "@/lib/rrg/types";
+import { cn } from "@/lib/utils";
+import { IconClock } from "@tabler/icons-react";
 
 interface RRGToolbarProps {
-  timeframe: RRGTimeframe
-  onTimeframeChange: (tf: RRGTimeframe) => void
-  stale?: boolean
-  computedAt?: string
+  timeframe: RRGTimeframe;
+  onTimeframeChange: (tf: RRGTimeframe) => void;
+  stale?: boolean;
+  computedAt?: string;
 }
 
 export function RRGToolbar({
@@ -21,7 +21,7 @@ export function RRGToolbar({
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">SektorTrend</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Sektor Trend</h1>
           <p className="text-muted-foreground">
             Relative Rotation Graph for IDX sectors vs IHSG
           </p>
@@ -67,5 +67,5 @@ export function RRGToolbar({
         </div>
       )}
     </div>
-  )
+  );
 }

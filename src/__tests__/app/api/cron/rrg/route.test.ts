@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
 const mockStoreClose = vi.fn()
+const mockStoreWeeklyClose = vi.fn()
 const mockReadAccumulated = vi.fn()
 const mockGetAccumulatedCount = vi.fn()
 
@@ -9,6 +10,7 @@ const mockChartFn = vi.fn()
 
 vi.mock("@/lib/rrg/accumulator", () => ({
   storeClose: (...args: any[]) => mockStoreClose(...args),
+  storeWeeklyClose: (...args: any[]) => mockStoreWeeklyClose(...args),
   readAccumulatedCloses: (...args: any[]) => mockReadAccumulated(...args),
   getAccumulatedCount: (...args: any[]) => mockGetAccumulatedCount(...args),
 }))
@@ -39,6 +41,7 @@ describe("POST /api/cron/rrg", () => {
     process.env = { ...OLD_ENV, CRON_SECRET: "test-secret" }
 
     mockStoreClose.mockResolvedValue(undefined)
+    mockStoreWeeklyClose.mockResolvedValue(undefined)
     mockReadAccumulated.mockResolvedValue([])
     mockGetAccumulatedCount.mockResolvedValue(0)
 

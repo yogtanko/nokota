@@ -9,13 +9,8 @@ vi.mock("recharts", () => {
     ))
   }
 
-  const MockCustomized = vi.fn(({ component }: any) => {
-    const Component = component
-    try {
-      return <div data-testid="recharts-Customized"><Component {...{}} /></div>
-    } catch {
-      return <div data-testid="recharts-Customized" />
-    }
+  const MockCustomized = vi.fn(({ children }: any) => {
+    return <div data-testid="recharts-Customized">{children}</div>
   })
 
   return {
@@ -39,6 +34,8 @@ vi.mock("recharts", () => {
     ReferenceLine: vi.fn(() => <div data-testid="recharts-ReferenceLine" />),
     ReferenceArea: vi.fn(() => <div data-testid="recharts-ReferenceArea" />),
     Customized: MockCustomized,
+    useXAxisScale: vi.fn(() => (v: number) => v * 10),
+    useYAxisScale: vi.fn(() => (v: number) => v * 10),
   }
 })
 

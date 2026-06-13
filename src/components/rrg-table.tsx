@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { cn } from "@/lib/utils"
+import { QUADRANT_STYLES } from "@/lib/rrg"
 import type { SectorRRGData } from "@/lib/rrg/rrg-service"
 import {
   Table,
@@ -15,13 +16,6 @@ import { IconSortDescending, IconSortAscending } from "@tabler/icons-react"
 
 interface RRGTableProps {
   sectors: SectorRRGData[]
-}
-
-const QUADRANT_COLORS: Record<string, string> = {
-  LEADING: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
-  WEAKENING: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800",
-  LAGGING: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800",
-  IMPROVING: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800",
 }
 
 type SortKey = "rsMomentum" | "rsRatio"
@@ -89,7 +83,7 @@ export function RRGTable({ sectors }: RRGTableProps) {
                 <span
                   className={cn(
                     "inline-block px-2 py-0.5 rounded-full text-xs font-medium border",
-                    QUADRANT_COLORS[s.quadrant],
+                    QUADRANT_STYLES[s.quadrant],
                   )}
                 >
                   {s.quadrant}

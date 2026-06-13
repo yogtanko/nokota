@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import YahooFinance from "yahoo-finance2"
-import { storeClose, readAccumulatedCloses } from "@/lib/rrg/accumulator"
+import { storeClose, storeWeeklyClose, readAccumulatedCloses } from "@/lib/rrg/accumulator"
 import { SECTOR_TICKERS, CHART_CONFIG } from "@/lib/rrg/constants"
 import { computeRRG } from "@/lib/rrg/calculations"
 import { getRedis } from "@/lib/redis"
@@ -19,9 +19,18 @@ function todayStr(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
+function weekKey(dateStr: string): string {
+  const d = new Date(dateStr + "T00:00:00Z")
+  const dayOfWeek = d.getUTCDay()
+  const monday = new Date(d)
+  const offset = (dayOfWeek + 6) % 7
+  monday.setUTCDate(d.getUTCDate() - offset)
+  return monday.toISOString().slice(0, 10)
+}
+
 async function backfillIhsg(
   period1: Date,
-  yf: YahooFinance,
+  yf: InstanceType<typeof YahooFinance>,
 ): Promise<void> {
   const chart = await yf.chart("^JKSE", {
     period1,
@@ -33,6 +42,7 @@ async function backfillIhsg(
         ? q.date.toISOString().slice(0, 10)
         : String(q.date)
       await storeClose("^JKSE", date, q.close)
+      await storeWeeklyClose("^JKSE", weekKey(date), q.close)
     }
   }
 }
@@ -56,7 +66,9 @@ export async function POST(request: Request) {
     for (const q of quoteArray) {
       const price = q.regularMarketPrice
       if (price != null && typeof price === "number") {
-        await storeClose(q.symbol ?? q.Symbol ?? "", todayDate, price)
+        const ticker = q.symbol ?? q.Symbol ?? ""
+        await storeClose(ticker, todayDate, price)
+        await storeWeeklyClose(ticker, weekKey(todayDate), price)
         stored++
       }
     }
@@ -100,6 +112,7 @@ export async function POST(request: Request) {
       timeframe: "daily",
       computed_at: new Date().toISOString(),
       stale: false,
+      dataAvailable: true,
       sectors,
     }
 

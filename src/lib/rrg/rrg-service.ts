@@ -1,6 +1,6 @@
 import { getRedis } from "@/lib/redis"
 import { computeRRG } from "./calculations"
-import { readAccumulatedClosesWithDates } from "./accumulator"
+import { readAccumulatedClosesWithDates, readWeeklyClosesWithDates } from "./accumulator"
 import { SECTOR_TICKERS, CACHE_KEYS, getAdaptiveTTL } from "./constants"
 import { Quadrant, type RRGTimeframe, type TailPoint } from "./types"
 
@@ -39,26 +39,48 @@ function aggregateWeekly(
   return Array.from(weekly.values())
 }
 
+async function getIhsgCloses(timeframe: RRGTimeframe): Promise<number[] | null> {
+  const daily = await readAccumulatedClosesWithDates("^JKSE")
+  if (daily.length < MIN_CLOSES_FOR_RRG) return null
+
+  if (timeframe === "daily") return daily.map((d) => d.close)
+
+  const weekly = await readWeeklyClosesWithDates("^JKSE")
+  if (weekly.length >= MIN_CLOSES_FOR_RRG) return weekly.map((d) => d.close)
+
+  const aggregated = aggregateWeekly(daily)
+  if (aggregated.length >= MIN_CLOSES_FOR_RRG) return aggregated
+
+  return null
+}
+
+async function getSectorCloses(ticker: string, timeframe: RRGTimeframe): Promise<number[] | null> {
+  if (timeframe === "daily") {
+    const closes = await readAccumulatedClosesWithDates(ticker)
+    return closes.length >= MIN_CLOSES_FOR_RRG ? closes.map((d) => d.close) : null
+  }
+
+  const weekly = await readWeeklyClosesWithDates(ticker)
+  if (weekly.length >= MIN_CLOSES_FOR_RRG) return weekly.map((d) => d.close)
+
+  return null
+}
+
 async function computeFromAccumulator(
   timeframe: RRGTimeframe,
 ): Promise<RRGApiResponse | null> {
-  const ihsgDaily = await readAccumulatedClosesWithDates("^JKSE")
-  if (ihsgDaily.length < MIN_CLOSES_FOR_RRG) return null
-
-  const ihsgCloses = timeframe === "weekly"
-    ? aggregateWeekly(ihsgDaily)
-    : ihsgDaily.map((d) => d.close)
+  const ihsgCloses = await getIhsgCloses(timeframe)
+  if (!ihsgCloses) return null
 
   const sectorTickers = SECTOR_TICKERS.filter((t) => t.ticker !== "^JKSE")
   const sectors: SectorRRGData[] = []
 
   for (const t of sectorTickers) {
-    const sectorDaily = await readAccumulatedClosesWithDates(t.ticker)
-    if (sectorDaily.length < MIN_CLOSES_FOR_RRG) return null
-
-    const sectorCloses = timeframe === "weekly"
-      ? aggregateWeekly(sectorDaily)
-      : sectorDaily.map((d) => d.close)
+    const sectorCloses = await getSectorCloses(t.ticker, timeframe)
+    if (!sectorCloses) {
+      console.warn(`[rrg-service] Skipping ${t.ticker}: insufficient ${timeframe} closes`)
+      continue
+    }
 
     const result = computeRRG(sectorCloses, ihsgCloses, timeframe)
     const safeTail = result.tail.map((p) => ({
@@ -74,6 +96,8 @@ async function computeFromAccumulator(
       tail: safeTail,
     })
   }
+
+  if (sectors.length === 0) return null
 
   return {
     timeframe,

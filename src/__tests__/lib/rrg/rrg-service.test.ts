@@ -4,6 +4,7 @@ const mockGet = vi.fn()
 const mockSet = vi.fn()
 const mockGetRedis = vi.fn()
 const mockReadAccumulatedClosesWithDates = vi.fn()
+const mockReadWeeklyClosesWithDates = vi.fn()
 
 vi.mock("@/lib/redis", () => ({
   getRedis: () => mockGetRedis(),
@@ -11,6 +12,7 @@ vi.mock("@/lib/redis", () => ({
 
 vi.mock("@/lib/rrg/accumulator", () => ({
   readAccumulatedClosesWithDates: (...args: any[]) => mockReadAccumulatedClosesWithDates(...args),
+  readWeeklyClosesWithDates: (...args: any[]) => mockReadWeeklyClosesWithDates(...args),
 }))
 
 import { getRRGData } from "@/lib/rrg/rrg-service"
@@ -39,6 +41,7 @@ describe("getRRGData", () => {
     mockGet.mockResolvedValue(null)
     mockSet.mockResolvedValue("OK")
     mockReadAccumulatedClosesWithDates.mockResolvedValue(makeAccumulatedData(7000, 60))
+    mockReadWeeklyClosesWithDates.mockResolvedValue(makeAccumulatedData(7000, 60))
   })
 
   it("returns RRG response with correct shape on cache miss", async () => {
