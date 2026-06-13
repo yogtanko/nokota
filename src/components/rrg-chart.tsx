@@ -283,7 +283,7 @@ export function RRGChart({ sectors }: RRGChartProps) {
             isAnimationActive={false}
           />
 
-          <Customized component={<TailTrajectories sectors={sectors} />} />
+          {/* <Customized component={<TailTrajectories sectors={sectors} />} /> */}
         </ScatterChart>
       </ResponsiveContainer>
     </div>
