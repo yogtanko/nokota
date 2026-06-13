@@ -14,13 +14,16 @@ export const SECTOR_TICKERS = [
 ] as const
 
 export const CHART_CONFIG = {
-  daily: { interval: "1d" as const, periods: 64 },
-  weekly: { interval: "1wk" as const, periods: 64 },
+  daily: { interval: "1d" as const, periods: 128 },
+  weekly: { interval: "1wk" as const, periods: 128 },
 } as const
+
+export const CLOSES_TTL = 158 * 86400
 
 export const CACHE_KEYS = {
   ohlcv: (ticker: string, tf: string) => `idx:${ticker}:ohlcv:${tf}`,
   rrg: (tf: string) => `rrg:${tf}`,
+  closes: (ticker: string) => `idx:close:${ticker}`,
 }
 
 export function getAdaptiveTTL(): number {

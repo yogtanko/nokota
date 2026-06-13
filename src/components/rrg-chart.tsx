@@ -145,6 +145,11 @@ function TailTrajectories(props: any) {
   )
 }
 
+function fmt(value: number | null | undefined, digits: number): string {
+  if (value == null || isNaN(value)) return "—"
+  return value.toFixed(digits)
+}
+
 function CustomTooltip({ active, payload }: any) {
   if (!active || !payload || !payload.length) return null
 
@@ -153,11 +158,11 @@ function CustomTooltip({ active, payload }: any) {
     <div className="rounded-xl bg-card px-4 py-3 shadow-lg ring-1 ring-border text-sm space-y-1">
       <p className="font-medium">{d.name}</p>
       <p className="text-muted-foreground">
-        RS-Ratio: <span className="font-medium tabular-nums text-foreground">{d.x.toFixed(2)}</span>
+        RS-Ratio: <span className="font-medium tabular-nums text-foreground">{fmt(d.x, 2)}</span>
       </p>
       <p className="text-muted-foreground">
         RS-Momentum:{" "}
-        <span className="font-medium tabular-nums text-foreground">{d.y.toFixed(2)}</span>
+        <span className="font-medium tabular-nums text-foreground">{fmt(d.y, 2)}</span>
       </p>
       <p className="text-muted-foreground">
         Quadrant:{" "}
@@ -191,7 +196,7 @@ export function RRGChart({ sectors }: RRGChartProps) {
 
   return (
     <div className="rounded-4xl bg-muted/30 ring-1 ring-border p-4 md:p-6">
-      <ResponsiveContainer width="100%" aspect={1}>
+      <ResponsiveContainer width="100%" aspect={1} minWidth={320} initialDimension={{ width: 320, height: 320 }}>
         <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis

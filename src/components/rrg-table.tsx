@@ -31,6 +31,11 @@ function shortLabel(ticker: string): string {
   return ticker.replace(/^IDX/, "").replace(/\.JK$/, "")
 }
 
+function fmt(value: number | null | undefined, digits: number): string {
+  if (value == null || isNaN(value)) return "—"
+  return value.toFixed(digits)
+}
+
 export function RRGTable({ sectors }: RRGTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>("rsMomentum")
   const [sortDir, setSortDir] = useState<SortDir>("desc")
@@ -77,8 +82,8 @@ export function RRGTable({ sectors }: RRGTableProps) {
             <TableRow key={s.ticker}>
               <TableCell className="font-mono text-xs">{shortLabel(s.ticker)}</TableCell>
               <TableCell className="font-medium">{s.name}</TableCell>
-              <TableCell className="text-right tabular-nums">{s.rsRatio.toFixed(2)}</TableCell>
-              <TableCell className="text-right tabular-nums">{s.rsMomentum.toFixed(2)}</TableCell>
+              <TableCell className="text-right tabular-nums">{fmt(s.rsRatio, 2)}</TableCell>
+              <TableCell className="text-right tabular-nums">{fmt(s.rsMomentum, 2)}</TableCell>
               <TableCell className="text-right tabular-nums">{slope}</TableCell>
               <TableCell>
                 <span
@@ -102,9 +107,11 @@ function calculateSlope(tail: { rsRatio: number; rsMomentum: number }[]): string
   if (tail.length < 2) return "—"
   const first = tail[0]
   const last = tail[tail.length - 1]
+  if (first == null || last == null) return "—"
   const diff = last.rsMomentum - first.rsMomentum
   const steps = tail.length - 1
   const perStep = diff / steps
+  if (!isFinite(perStep)) return "—"
   if (Math.abs(perStep) < 0.01) return "0.00"
-  return perStep > 0 ? `+${perStep.toFixed(2)}` : perStep.toFixed(2)
+  return perStep > 0 ? `+${fmt(perStep, 2)}` : fmt(perStep, 2)
 }
