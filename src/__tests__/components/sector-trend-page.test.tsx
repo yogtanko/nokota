@@ -32,13 +32,13 @@ const mockResponse = {
   ],
 }
 
+let mockSwrReturn: any
+let capturedSwrOptions: any
+
 vi.mock("swr", () => ({
-  default: (key: string) => ({
-    data: key?.includes("daily") ? mockResponse : { ...mockResponse, timeframe: "weekly" },
-    error: undefined,
-    isLoading: false,
-    isValidating: false,
-    mutate: vi.fn(),
+  default: vi.fn((key: string, _fetcher: any, options: any) => {
+    capturedSwrOptions = options
+    return mockSwrReturn
   }),
 }))
 
@@ -47,6 +47,14 @@ import SectorTrendPage from "@/app/(app)/apps/trade-deck/sector-trend/page"
 describe("SektorTrend Page", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockSwrReturn = {
+      data: mockResponse,
+      error: undefined,
+      isLoading: false,
+      isValidating: false,
+      mutate: vi.fn(),
+    }
+    capturedSwrOptions = undefined
   })
 
   it("renders page title and description", () => {
@@ -77,5 +85,50 @@ describe("SektorTrend Page", () => {
       expect(screen.getByTestId("rrg-chart")).toHaveTextContent("11 sectors")
       expect(screen.getByTestId("rrg-table")).toHaveTextContent("11 sectors")
     })
+  })
+
+  it("shows stale data banner when data is stale", async () => {
+    mockSwrReturn = {
+      ...mockSwrReturn,
+      data: { ...mockResponse, stale: true },
+    }
+    render(<SectorTrendPage />)
+    await waitFor(() => {
+      expect(screen.getByText(/Data loaded is not real-time/i)).toBeInTheDocument()
+    })
+  })
+
+  it("shows retry button on error without fallback data", async () => {
+    mockSwrReturn = {
+      data: undefined,
+      error: new Error("Failed to fetch"),
+      isLoading: false,
+      isValidating: false,
+      mutate: vi.fn(),
+    }
+    render(<SectorTrendPage />)
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /retry/i })).toBeInTheDocument()
+    })
+  })
+
+  it("keeps previous data visible while re-fetching", async () => {
+    mockSwrReturn = {
+      data: mockResponse,
+      error: undefined,
+      isLoading: false,
+      isValidating: true,
+      mutate: vi.fn(),
+    }
+    render(<SectorTrendPage />)
+    await waitFor(() => {
+      expect(screen.getByTestId("rrg-chart")).toBeInTheDocument()
+      expect(screen.getByTestId("rrg-table")).toBeInTheDocument()
+    })
+  })
+
+  it("passes errorRetryCount: 3 in SWR options", () => {
+    render(<SectorTrendPage />)
+    expect(capturedSwrOptions?.errorRetryCount).toBe(3)
   })
 })
