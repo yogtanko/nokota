@@ -1,0 +1,81 @@
+import { describe, it, expect, vi, beforeEach } from "vitest"
+import { render, screen, waitFor } from "@testing-library/react"
+
+vi.mock("@/components/rrg-chart", () => ({
+  RRGChart: vi.fn(({ sectors }) => <div data-testid="rrg-chart">{sectors.length} sectors</div>),
+}))
+
+vi.mock("@/components/rrg-table", () => ({
+  RRGTable: vi.fn(({ sectors }) => <div data-testid="rrg-table">{sectors.length} sectors</div>),
+}))
+
+vi.mock("@/components/rrg-skeleton", () => ({
+  RRGSkeleton: () => <div data-testid="rrg-skeleton">Loading...</div>,
+}))
+
+const mockResponse = {
+  timeframe: "daily",
+  computed_at: new Date().toISOString(),
+  stale: false,
+  sectors: [
+    { ticker: "IDXENERGY.JK", name: "Energy", rsRatio: 105, rsMomentum: 110, quadrant: "LEADING", tail: [] },
+    { ticker: "IDXBASIC.JK", name: "Basic Materials", rsRatio: 98, rsMomentum: 92, quadrant: "LAGGING", tail: [] },
+    { ticker: "IDXINDUST.JK", name: "Industrials", rsRatio: 102, rsMomentum: 95, quadrant: "WEAKENING", tail: [] },
+    { ticker: "IDXNONCYC.JK", name: "Non-Cyclicals", rsRatio: 97, rsMomentum: 105, quadrant: "IMPROVING", tail: [] },
+    { ticker: "IDXCYCLIC.JK", name: "Cyclicals", rsRatio: 100, rsMomentum: 100, quadrant: "LEADING", tail: [] },
+    { ticker: "IDXHEALTH.JK", name: "Healthcare", rsRatio: 103, rsMomentum: 108, quadrant: "LEADING", tail: [] },
+    { ticker: "IDXFIN.JK", name: "Financials", rsRatio: 101, rsMomentum: 103, quadrant: "LEADING", tail: [] },
+    { ticker: "IDXPROP.JK", name: "Property", rsRatio: 95, rsMomentum: 85, quadrant: "LAGGING", tail: [] },
+    { ticker: "IDXTECH.JK", name: "Technology", rsRatio: 99, rsMomentum: 102, quadrant: "IMPROVING", tail: [] },
+    { ticker: "IDXINFRA.JK", name: "Infrastructure", rsRatio: 104, rsMomentum: 97, quadrant: "WEAKENING", tail: [] },
+    { ticker: "IDXTRANS.JK", name: "Transportation", rsRatio: 96, rsMomentum: 90, quadrant: "LAGGING", tail: [] },
+  ],
+}
+
+vi.mock("swr", () => ({
+  default: (key: string) => ({
+    data: key?.includes("daily") ? mockResponse : { ...mockResponse, timeframe: "weekly" },
+    error: undefined,
+    isLoading: false,
+    isValidating: false,
+    mutate: vi.fn(),
+  }),
+}))
+
+import SectorTrendPage from "@/app/(app)/apps/trade-deck/sector-trend/page"
+
+describe("SektorTrend Page", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it("renders page title and description", () => {
+    render(<SectorTrendPage />)
+    expect(screen.getByText("SektorTrend")).toBeInTheDocument()
+    expect(screen.getByText(/Relative Rotation Graph/i)).toBeInTheDocument()
+  })
+
+  it("renders timeframe toggle buttons", () => {
+    render(<SectorTrendPage />)
+    expect(screen.getByRole("button", { name: /daily/i })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /weekly/i })).toBeInTheDocument()
+  })
+
+  it("renders chart and table after data loads", async () => {
+    render(<SectorTrendPage />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId("rrg-chart")).toBeInTheDocument()
+      expect(screen.getByTestId("rrg-table")).toBeInTheDocument()
+    })
+  })
+
+  it("renders 11 sectors in chart and table", async () => {
+    render(<SectorTrendPage />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId("rrg-chart")).toHaveTextContent("11 sectors")
+      expect(screen.getByTestId("rrg-table")).toHaveTextContent("11 sectors")
+    })
+  })
+})
