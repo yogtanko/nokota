@@ -61,7 +61,7 @@ export function RRGToolbar({
         <div className="flex items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 px-4 py-2.5 text-sm text-amber-800 dark:text-amber-200">
           <IconClock size={16} className="shrink-0" />
           <span>
-            Data may be stale. Last computed:{" "}
+            Data loaded is not real-time — last updated at{" "}
             {new Date(computedAt).toLocaleString("id-ID")}
           </span>
         </div>
