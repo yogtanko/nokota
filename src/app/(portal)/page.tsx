@@ -1,10 +1,11 @@
 import Link from "next/link"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { categories } from "@/config/apps"
-import { IconCalculator } from "@tabler/icons-react"
+import { IconCalculator, IconTrendingUp } from "@tabler/icons-react"
 
 const appIcons: Record<string, React.ReactNode> = {
   "risk-calculator": <IconCalculator size={20} />,
+  "sector-trend": <IconTrendingUp size={20} />,
 }
 
 export default function PortalPage() {

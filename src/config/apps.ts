@@ -24,6 +24,12 @@ export const categories: CategoryConfig[] = [
         description: "Calculate position sizing and risk/reward ratio for your trades",
         icon: "Calculator",
       },
+      {
+        id: "sector-trend",
+        name: "SektorTrend",
+        description: "Interactive Relative Rotation Graph for IDX sectors vs IHSG",
+        icon: "TrendingUp",
+      },
     ],
   },
 ]

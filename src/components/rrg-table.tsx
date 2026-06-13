@@ -1,0 +1,110 @@
+"use client"
+
+import { useMemo, useState } from "react"
+import { cn } from "@/lib/utils"
+import type { SectorRRGData } from "@/lib/rrg/rrg-service"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { IconSortDescending, IconSortAscending } from "@tabler/icons-react"
+
+interface RRGTableProps {
+  sectors: SectorRRGData[]
+}
+
+const QUADRANT_COLORS: Record<string, string> = {
+  LEADING: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
+  WEAKENING: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800",
+  LAGGING: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800",
+  IMPROVING: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800",
+}
+
+type SortKey = "rsMomentum" | "rsRatio"
+type SortDir = "desc" | "asc"
+
+function shortLabel(ticker: string): string {
+  return ticker.replace(/^IDX/, "").replace(/\.JK$/, "")
+}
+
+export function RRGTable({ sectors }: RRGTableProps) {
+  const [sortKey, setSortKey] = useState<SortKey>("rsMomentum")
+  const [sortDir, setSortDir] = useState<SortDir>("desc")
+
+  const sorted = useMemo(() => {
+    return [...sectors].sort((a, b) => {
+      const diff = a[sortKey] - b[sortKey]
+      return sortDir === "desc" ? -diff : diff
+    })
+  }, [sectors, sortKey, sortDir])
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "desc" ? "asc" : "desc"))
+    } else {
+      setSortKey(key)
+      setSortDir("desc")
+    }
+  }
+
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Kode Sektor</TableHead>
+          <TableHead>Nama Sektor</TableHead>
+          <TableHead className="text-right">RS-Ratio</TableHead>
+          <TableHead className="text-right cursor-pointer select-none" onClick={() => toggleSort("rsMomentum")}>
+            <span className="inline-flex items-center gap-1">
+              RS-Momentum
+              {sortKey === "rsMomentum" ? (
+                sortDir === "desc" ? <IconSortDescending size={14} /> : <IconSortAscending size={14} />
+              ) : null}
+            </span>
+          </TableHead>
+          <TableHead className="text-right">Trend Slope</TableHead>
+          <TableHead>Kuadran</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {sorted.map((s) => {
+          const slope = calculateSlope(s.tail)
+          return (
+            <TableRow key={s.ticker}>
+              <TableCell className="font-mono text-xs">{shortLabel(s.ticker)}</TableCell>
+              <TableCell className="font-medium">{s.name}</TableCell>
+              <TableCell className="text-right tabular-nums">{s.rsRatio.toFixed(2)}</TableCell>
+              <TableCell className="text-right tabular-nums">{s.rsMomentum.toFixed(2)}</TableCell>
+              <TableCell className="text-right tabular-nums">{slope}</TableCell>
+              <TableCell>
+                <span
+                  className={cn(
+                    "inline-block px-2 py-0.5 rounded-full text-xs font-medium border",
+                    QUADRANT_COLORS[s.quadrant],
+                  )}
+                >
+                  {s.quadrant}
+                </span>
+              </TableCell>
+            </TableRow>
+          )
+        })}
+      </TableBody>
+    </Table>
+  )
+}
+
+function calculateSlope(tail: { rsRatio: number; rsMomentum: number }[]): string {
+  if (tail.length < 2) return "—"
+  const first = tail[0]
+  const last = tail[tail.length - 1]
+  const diff = last.rsMomentum - first.rsMomentum
+  const steps = tail.length - 1
+  const perStep = diff / steps
+  if (Math.abs(perStep) < 0.01) return "0.00"
+  return perStep > 0 ? `+${perStep.toFixed(2)}` : perStep.toFixed(2)
+}
