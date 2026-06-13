@@ -1,6 +1,7 @@
 import { getRedis } from "@/lib/redis"
 import { fetchSectorOHLCV } from "./sector-data"
 import { computeRRG } from "./calculations"
+import { readAccumulatedCloses } from "./accumulator"
 import { SECTOR_TICKERS, CACHE_KEYS, getAdaptiveTTL } from "./constants"
 import { Quadrant, type RRGTimeframe, type TailPoint } from "./types"
 
@@ -17,6 +18,7 @@ export interface RRGApiResponse {
   timeframe: RRGTimeframe
   computed_at: string
   stale: boolean
+  dataAvailable: boolean
   sectors: SectorRRGData[]
 }
 
@@ -33,13 +35,17 @@ async function fetchAndCompute(
   for (const t of sectorTickers) {
     const sectorCloses = ohlcvMap.get(t.ticker) ?? []
     const result = computeRRG(sectorCloses, ihsgCloses, timeframe)
+    const safeTail = result.tail.map((p) => ({
+      rsRatio: isNaN(p.rsRatio) ? 100 : p.rsRatio,
+      rsMomentum: isNaN(p.rsMomentum) ? 100 : p.rsMomentum,
+    }))
     sectors.push({
       ticker: t.ticker,
       name: t.name,
-      rsRatio: result.rsRatio,
-      rsMomentum: result.rsMomentum,
+      rsRatio: isNaN(result.rsRatio) ? 100 : result.rsRatio,
+      rsMomentum: isNaN(result.rsMomentum) ? 100 : result.rsMomentum,
       quadrant: result.quadrant,
-      tail: result.tail,
+      tail: safeTail,
     })
   }
 
@@ -47,6 +53,48 @@ async function fetchAndCompute(
     timeframe,
     computed_at: new Date().toISOString(),
     stale: false,
+    dataAvailable: true,
+    sectors,
+  }
+}
+
+const MIN_CLOSES_FOR_RRG = 30
+
+async function computeFromAccumulator(
+  timeframe: RRGTimeframe,
+): Promise<RRGApiResponse | null> {
+  if (timeframe === "weekly") return null
+
+  const ihsgCloses = await readAccumulatedCloses("^JKSE")
+  if (ihsgCloses.length < MIN_CLOSES_FOR_RRG) return null
+
+  const sectorTickers = SECTOR_TICKERS.filter((t) => t.ticker !== "^JKSE")
+  const sectors: SectorRRGData[] = []
+
+  for (const t of sectorTickers) {
+    const sectorCloses = await readAccumulatedCloses(t.ticker)
+    if (sectorCloses.length < MIN_CLOSES_FOR_RRG) return null
+
+    const result = computeRRG(sectorCloses, ihsgCloses, timeframe)
+    const safeTail = result.tail.map((p) => ({
+      rsRatio: isNaN(p.rsRatio) ? 100 : p.rsRatio,
+      rsMomentum: isNaN(p.rsMomentum) ? 100 : p.rsMomentum,
+    }))
+    sectors.push({
+      ticker: t.ticker,
+      name: t.name,
+      rsRatio: isNaN(result.rsRatio) ? 100 : result.rsRatio,
+      rsMomentum: isNaN(result.rsMomentum) ? 100 : result.rsMomentum,
+      quadrant: result.quadrant,
+      tail: safeTail,
+    })
+  }
+
+  return {
+    timeframe,
+    computed_at: new Date().toISOString(),
+    stale: false,
+    dataAvailable: true,
     sectors,
   }
 }
@@ -66,27 +114,40 @@ export async function getRRGData(
     }
   }
 
-  try {
-    const result = await fetchAndCompute(timeframe)
-
+  const fromAccumulator = await computeFromAccumulator(timeframe)
+  if (fromAccumulator) {
     if (redis) {
       redis
-        .set(cacheKey, result, { ex: getAdaptiveTTL() })
+        .set(cacheKey, fromAccumulator, { ex: getAdaptiveTTL() })
         .catch(() => {})
     }
+    return fromAccumulator
+  }
 
-    return result
-  } catch (err) {
-    if (redis) {
-      try {
-        const stale = await redis.get<RRGApiResponse>(cacheKey)
-        if (stale) {
-          return { ...stale, stale: true }
-        }
-      } catch {
-        // Stale cache unavailable too
+  const stale = redis
+    ? await redis.get<RRGApiResponse>(cacheKey).catch(() => null)
+    : null
+  if (stale) {
+    return { ...stale, stale: true, dataAvailable: true }
+  }
+
+  if (timeframe === "weekly") {
+    try {
+      const result = await fetchAndCompute(timeframe)
+      if (redis) {
+        redis.set(cacheKey, result, { ex: getAdaptiveTTL() }).catch(() => {})
       }
+      return result
+    } catch (err) {
+      throw err
     }
-    throw err
+  }
+
+  return {
+    timeframe,
+    computed_at: new Date().toISOString(),
+    stale: false,
+    dataAvailable: false,
+    sectors: [],
   }
 }

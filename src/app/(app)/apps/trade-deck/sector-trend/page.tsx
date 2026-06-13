@@ -4,6 +4,7 @@ import useSWR from "swr"
 import dynamic from "next/dynamic"
 import { RRGToolbar } from "@/components/rrg-toolbar"
 import { RRGSkeleton } from "@/components/rrg-skeleton"
+import { RRGComingSoon } from "@/components/rrg-coming-soon"
 import { ErrorBoundary } from "@/components/error-boundary"
 import type { RRGApiResponse } from "@/lib/rrg/rrg-service"
 import type { RRGTimeframe } from "@/lib/rrg/types"
@@ -11,12 +12,12 @@ import { useState } from "react"
 
 const RRGChart = dynamic(() => import("@/components/rrg-chart").then((m) => ({ default: m.RRGChart })), {
   ssr: false,
-  loading: () => <div className="lg:w-3/5 aspect-square rounded-4xl bg-muted/30 ring-1 ring-border animate-pulse" />,
+  loading: () => <div className="lg:w-2/5 aspect-square rounded-4xl bg-muted/30 ring-1 ring-border animate-pulse" />,
 })
 
 const RRGTable = dynamic(() => import("@/components/rrg-table").then((m) => ({ default: m.RRGTable })), {
   ssr: false,
-  loading: () => <div className="lg:w-2/5 h-96 rounded-4xl bg-muted/30 ring-1 ring-border animate-pulse" />,
+  loading: () => <div className="lg:w-3/5 h-96 rounded-4xl bg-muted/30 ring-1 ring-border animate-pulse" />,
 })
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
@@ -60,12 +61,14 @@ export default function SectorTrendPage() {
               Retry
             </button>
           </div>
+        ) : data && !data.dataAvailable ? (
+          <RRGComingSoon />
         ) : data ? (
           <div className="flex flex-col lg:flex-row gap-6">
+          <div className="lg:w-2/5 min-w-[320px]">
+            <RRGChart sectors={data.sectors} />
+          </div>
             <div className="lg:w-3/5">
-              <RRGChart sectors={data.sectors} />
-            </div>
-            <div className="lg:w-2/5">
               <div className="rounded-4xl bg-muted/30 ring-1 ring-border overflow-hidden">
                 <RRGTable sectors={data.sectors} />
               </div>
