@@ -1,9 +1,10 @@
 import YahooFinance from "yahoo-finance2"
-import { SECTOR_TICKERS, CHART_CONFIG, type RRGTimeframe } from "./constants"
+import { SECTOR_TICKERS, CHART_CONFIG } from "./constants"
+import type { RRGTimeframe } from "./types"
 
 export async function fetchSectorOHLCV(
   timeframe: RRGTimeframe,
-  yf: YahooFinance = new YahooFinance(),
+  yf: InstanceType<typeof YahooFinance> = new YahooFinance(),
 ): Promise<Map<string, number[]>> {
   const config = CHART_CONFIG[timeframe]
   const period1 = new Date(
