@@ -3,35 +3,33 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 const mockGet = vi.fn()
 const mockSet = vi.fn()
 const mockGetRedis = vi.fn()
-const mockFetchSectorOHLCV = vi.fn()
-const mockReadAccumulatedCloses = vi.fn()
+const mockReadAccumulatedClosesWithDates = vi.fn()
 
 vi.mock("@/lib/redis", () => ({
   getRedis: () => mockGetRedis(),
 }))
 
-vi.mock("@/lib/rrg/sector-data", () => ({
-  fetchSectorOHLCV: (...args: any[]) => mockFetchSectorOHLCV(...args),
-}))
-
 vi.mock("@/lib/rrg/accumulator", () => ({
-  readAccumulatedCloses: (...args: any[]) => mockReadAccumulatedCloses(...args),
+  readAccumulatedClosesWithDates: (...args: any[]) => mockReadAccumulatedClosesWithDates(...args),
 }))
 
 import { getRRGData } from "@/lib/rrg/rrg-service"
 import { SECTOR_TICKERS } from "@/lib/rrg/constants"
 
-function makeOhlcvData(basePrice: number, length: number): number[] {
-  return Array.from({ length }, (_, i) => basePrice + i * 10)
-}
-
-function buildMockOhlcvMap(): Map<string, number[]> {
-  const map = new Map<string, number[]>()
-  for (const t of SECTOR_TICKERS) {
-    const base = t.ticker === "^JKSE" ? 7000 : 5000 + Math.random() * 1000
-    map.set(t.ticker, makeOhlcvData(base, 100))
-  }
-  return map
+function makeAccumulatedData(
+  basePrice: number,
+  length: number,
+  startDate = "2026-01-05",
+): { date: string; close: number }[] {
+  const start = new Date(startDate + "T00:00:00Z")
+  return Array.from({ length }, (_, i) => {
+    const d = new Date(start)
+    d.setUTCDate(start.getUTCDate() + i)
+    return {
+      date: d.toISOString().slice(0, 10),
+      close: basePrice + i * 10,
+    }
+  })
 }
 
 describe("getRRGData", () => {
@@ -40,10 +38,7 @@ describe("getRRGData", () => {
     mockGetRedis.mockReturnValue({ get: mockGet, set: mockSet })
     mockGet.mockResolvedValue(null)
     mockSet.mockResolvedValue("OK")
-    mockFetchSectorOHLCV.mockResolvedValue(buildMockOhlcvMap())
-    mockReadAccumulatedCloses.mockResolvedValue(
-      Array.from({ length: 60 }, (_, i) => 7000 + i * 10),
-    )
+    mockReadAccumulatedClosesWithDates.mockResolvedValue(makeAccumulatedData(7000, 60))
   })
 
   it("returns RRG response with correct shape on cache miss", async () => {
@@ -89,7 +84,6 @@ describe("getRRGData", () => {
     const result = await getRRGData("daily")
     expect(result).toEqual(cached)
     expect(mockGet).toHaveBeenCalledWith("rrg:daily")
-    expect(mockFetchSectorOHLCV).not.toHaveBeenCalled()
   })
 
   it("stores computed result in Redis on cache miss", async () => {
@@ -105,19 +99,20 @@ describe("getRRGData", () => {
   it("works without Redis when getRedis returns null", async () => {
     mockGetRedis.mockReturnValue(null)
     const result = await getRRGData("daily")
+    expect(result).toHaveProperty("timeframe", "daily")
     expect(result.sectors).toHaveLength(11)
   })
 
   it("returns dataAvailable false when accumulator has no data and no stale cache", async () => {
-    mockReadAccumulatedCloses.mockResolvedValue([])
+    mockReadAccumulatedClosesWithDates.mockResolvedValue([])
 
     const result = await getRRGData("daily")
     expect(result).toHaveProperty("dataAvailable", false)
     expect(result.sectors).toEqual([])
   })
 
-  it("returns stale cache on Yahoo failure when cache exists (weekly)", async () => {
-    mockFetchSectorOHLCV.mockRejectedValue(new Error("Yahoo unavailable"))
+  it("returns stale cache when accumulator empty and stale exists (weekly)", async () => {
+    mockReadAccumulatedClosesWithDates.mockResolvedValue([])
     const cached = {
       timeframe: "weekly" as const,
       computed_at: new Date(Date.now() - 3600000).toISOString(),
@@ -126,21 +121,24 @@ describe("getRRGData", () => {
       sectors: [] as any[],
     }
     mockGet
-      .mockResolvedValueOnce(null)   // first call: cache miss
-      .mockResolvedValueOnce(cached)  // second call: stale fallback
+      .mockResolvedValueOnce(null)   // cache miss
+      .mockResolvedValueOnce(cached)  // stale fallback
 
     const result = await getRRGData("weekly")
     expect(result.stale).toBe(true)
   })
 
-  it("throws when Yahoo fails and no stale cache exists (weekly)", async () => {
-    mockFetchSectorOHLCV.mockRejectedValue(new Error("Yahoo unavailable"))
+  it("returns dataAvailable false when accumulator empty and no stale cache (weekly)", async () => {
+    mockReadAccumulatedClosesWithDates.mockResolvedValue([])
     mockGet.mockResolvedValue(null)
 
-    await expect(getRRGData("weekly")).rejects.toThrow()
+    const result = await getRRGData("weekly")
+    expect(result).toHaveProperty("dataAvailable", false)
+    expect(result.sectors).toEqual([])
   })
 
-  it("returns data for weekly timeframe", async () => {
+  it("returns data for weekly timeframe via accumulator", async () => {
+    mockReadAccumulatedClosesWithDates.mockResolvedValue(makeAccumulatedData(7000, 60))
     const result = await getRRGData("weekly")
     expect(result.timeframe).toBe("weekly")
     expect(result.sectors).toHaveLength(11)
@@ -162,12 +160,12 @@ describe("getRRGData", () => {
   })
 
   it("falls through when Redis .get() throws on stale cache retrieval (weekly)", async () => {
-    mockReadAccumulatedCloses.mockResolvedValue([])
-    mockFetchSectorOHLCV.mockRejectedValue(new Error("Yahoo error"))
+    mockReadAccumulatedClosesWithDates.mockResolvedValue([])
     mockGet
       .mockResolvedValueOnce(null)
       .mockRejectedValueOnce(new Error("Redis error"))
 
-    await expect(getRRGData("weekly")).rejects.toThrow("Yahoo error")
+    const result = await getRRGData("weekly")
+    expect(result).toHaveProperty("dataAvailable", false)
   })
 })

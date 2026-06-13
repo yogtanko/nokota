@@ -1,7 +1,6 @@
 import { getRedis } from "@/lib/redis"
-import { fetchSectorOHLCV } from "./sector-data"
 import { computeRRG } from "./calculations"
-import { readAccumulatedCloses } from "./accumulator"
+import { readAccumulatedClosesWithDates } from "./accumulator"
 import { SECTOR_TICKERS, CACHE_KEYS, getAdaptiveTTL } from "./constants"
 import { Quadrant, type RRGTimeframe, type TailPoint } from "./types"
 
@@ -22,58 +21,44 @@ export interface RRGApiResponse {
   sectors: SectorRRGData[]
 }
 
-async function fetchAndCompute(
-  timeframe: RRGTimeframe,
-): Promise<RRGApiResponse> {
-  const ohlcvMap = await fetchSectorOHLCV(timeframe)
-
-  const ihsgCloses = ohlcvMap.get("^JKSE") ?? []
-  const sectorTickers = SECTOR_TICKERS.filter((t) => t.ticker !== "^JKSE")
-
-  const sectors: SectorRRGData[] = []
-
-  for (const t of sectorTickers) {
-    const sectorCloses = ohlcvMap.get(t.ticker) ?? []
-    const result = computeRRG(sectorCloses, ihsgCloses, timeframe)
-    const safeTail = result.tail.map((p) => ({
-      rsRatio: isNaN(p.rsRatio) ? 100 : p.rsRatio,
-      rsMomentum: isNaN(p.rsMomentum) ? 100 : p.rsMomentum,
-    }))
-    sectors.push({
-      ticker: t.ticker,
-      name: t.name,
-      rsRatio: isNaN(result.rsRatio) ? 100 : result.rsRatio,
-      rsMomentum: isNaN(result.rsMomentum) ? 100 : result.rsMomentum,
-      quadrant: result.quadrant,
-      tail: safeTail,
-    })
-  }
-
-  return {
-    timeframe,
-    computed_at: new Date().toISOString(),
-    stale: false,
-    dataAvailable: true,
-    sectors,
-  }
-}
-
 const MIN_CLOSES_FOR_RRG = 30
+
+function aggregateWeekly(
+  dailyData: { date: string; close: number }[],
+): number[] {
+  const weekly = new Map<string, number>()
+  for (const { date, close } of dailyData) {
+    const d = new Date(date + "T00:00:00Z")
+    const dayOfWeek = d.getUTCDay()
+    const monday = new Date(d)
+    const offset = (dayOfWeek + 6) % 7
+    monday.setUTCDate(d.getUTCDate() - offset)
+    const weekKey = monday.toISOString().slice(0, 10)
+    weekly.set(weekKey, close)
+  }
+  return Array.from(weekly.values())
+}
 
 async function computeFromAccumulator(
   timeframe: RRGTimeframe,
 ): Promise<RRGApiResponse | null> {
-  if (timeframe === "weekly") return null
+  const ihsgDaily = await readAccumulatedClosesWithDates("^JKSE")
+  if (ihsgDaily.length < MIN_CLOSES_FOR_RRG) return null
 
-  const ihsgCloses = await readAccumulatedCloses("^JKSE")
-  if (ihsgCloses.length < MIN_CLOSES_FOR_RRG) return null
+  const ihsgCloses = timeframe === "weekly"
+    ? aggregateWeekly(ihsgDaily)
+    : ihsgDaily.map((d) => d.close)
 
   const sectorTickers = SECTOR_TICKERS.filter((t) => t.ticker !== "^JKSE")
   const sectors: SectorRRGData[] = []
 
   for (const t of sectorTickers) {
-    const sectorCloses = await readAccumulatedCloses(t.ticker)
-    if (sectorCloses.length < MIN_CLOSES_FOR_RRG) return null
+    const sectorDaily = await readAccumulatedClosesWithDates(t.ticker)
+    if (sectorDaily.length < MIN_CLOSES_FOR_RRG) return null
+
+    const sectorCloses = timeframe === "weekly"
+      ? aggregateWeekly(sectorDaily)
+      : sectorDaily.map((d) => d.close)
 
     const result = computeRRG(sectorCloses, ihsgCloses, timeframe)
     const safeTail = result.tail.map((p) => ({
@@ -129,18 +114,6 @@ export async function getRRGData(
     : null
   if (stale) {
     return { ...stale, stale: true, dataAvailable: true }
-  }
-
-  if (timeframe === "weekly") {
-    try {
-      const result = await fetchAndCompute(timeframe)
-      if (redis) {
-        redis.set(cacheKey, result, { ex: getAdaptiveTTL() }).catch(() => {})
-      }
-      return result
-    } catch (err) {
-      throw err
-    }
   }
 
   return {
