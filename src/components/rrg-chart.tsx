@@ -201,7 +201,13 @@ export function RRGChart({ sectors }: RRGChartProps) {
   }
 
   return (
-    <div className="rounded-4xl bg-gradient-to-br from-muted/30 to-muted/50 ring-1 ring-border p-4 md:p-6">
+    <div
+      className="rounded-4xl bg-gradient-to-br from-muted/30 to-muted/50 ring-1 ring-border p-4 md:p-6"
+      onMouseDown={(e) => {
+        // Prevent focus on click
+        e.preventDefault();
+      }}
+    >
       <div className="flex justify-center gap-2 pb-4">
         {QUADRANT_CONFIG.map((q) => (
           <span
@@ -267,8 +273,8 @@ export function RRGChart({ sectors }: RRGChartProps) {
             />
           ))}
 
-          <ReferenceLine x={100} stroke="var(--border)" strokeWidth={1.5} />
-          <ReferenceLine y={100} stroke="var(--border)" strokeWidth={1.5} />
+          {/* <ReferenceLine x={100} stroke="var(--border)" strokeWidth={1.5} />
+          <ReferenceLine y={100} stroke="var(--border)" strokeWidth={1.5} /> */}
 
           <Tooltip
             content={<CustomTooltip />}

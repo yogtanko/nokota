@@ -141,7 +141,11 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-image: radial-gradient(ellipse at 50% 0%, color-mix(in oklch, var(--primary) 4%, transparent) 0%, transparent 70%);
+    background-image: radial-gradient(
+      ellipse at 50% 0%,
+      color-mix(in oklch, var(--primary) 4%, transparent) 0%,
+      transparent 70%
+    );
   }
   html {
     @apply font-sans;
