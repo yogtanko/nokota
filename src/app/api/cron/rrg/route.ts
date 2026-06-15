@@ -12,6 +12,8 @@ import type { SectorRRGData, RRGApiResponse } from "@/lib/rrg/rrg-service"
 function isAuthorized(request: Request): boolean {
   const secret = process.env.CRON_SECRET
   if (!secret) return false
+  const auth = request.headers.get("authorization")
+  if (auth === `Bearer ${secret}`) return true
   return request.headers.get("x-cron-secret") === secret
 }
 
@@ -47,7 +49,7 @@ async function backfillIhsg(
   }
 }
 
-export async function POST(request: Request) {
+async function handleRRGCron(request: Request) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
@@ -135,4 +137,12 @@ export async function POST(request: Request) {
       { status: 503 },
     )
   }
+}
+
+export async function GET(request: Request) {
+  return handleRRGCron(request)
+}
+
+export async function POST(request: Request) {
+  return handleRRGCron(request)
 }
