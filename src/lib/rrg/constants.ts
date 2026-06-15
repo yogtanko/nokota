@@ -41,7 +41,23 @@ export function getAdaptiveTTL(): number {
     return 900;
   }
 
-  return 43200;
+  // Calculate exact seconds until next 09:00 WIB on a weekday
+  const nowWIB = new Date(now.getTime() + 7 * 3600 * 1000);
+  const nextOpen = new Date(nowWIB);
+  nextOpen.setUTCHours(9, 0, 0, 0);
+
+  // If past 09:00 WIB today, advance to next day
+  if (nowWIB.getUTCHours() >= 9) {
+    nextOpen.setUTCDate(nextOpen.getUTCDate() + 1);
+  }
+
+  // Skip weekend: Sat → Mon, Sun → Mon
+  const nextDay = nextOpen.getUTCDay();
+  if (nextDay === 0) nextOpen.setUTCDate(nextOpen.getUTCDate() + 1);
+  if (nextDay === 6) nextOpen.setUTCDate(nextOpen.getUTCDate() + 2);
+
+  const diff = Math.floor((nextOpen.getTime() - now.getTime()) / 1000);
+  return Math.min(diff, 86400);
 }
 
 export type RRGTimeframe = "daily" | "weekly";

@@ -8,7 +8,7 @@ import { RRGComingSoon } from "@/components/rrg-coming-soon"
 import { ErrorBoundary } from "@/components/error-boundary"
 import type { RRGApiResponse } from "@/lib/rrg/rrg-service"
 import type { RRGTimeframe } from "@/lib/rrg/types"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 const RRGChart = dynamic(() => import("@/components/rrg-chart").then((m) => ({ default: m.RRGChart })), {
   ssr: false,
@@ -24,6 +24,7 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 export default function SectorTrendPage() {
   const [timeframe, setTimeframe] = useState<RRGTimeframe>("daily")
+  const [showTabSkeleton, setShowTabSkeleton] = useState(false)
 
   const { data, error, isLoading } = useSWR<RRGApiResponse>(
     `/api/rrg?timeframe=${timeframe}`,
@@ -36,6 +37,14 @@ export default function SectorTrendPage() {
     },
   )
 
+  useEffect(() => {
+    if (isLoading && data) {
+      const timer = setTimeout(() => setShowTabSkeleton(true), 300)
+      return () => clearTimeout(timer)
+    }
+    setShowTabSkeleton(false)
+  }, [isLoading, data])
+
   return (
     <ErrorBoundary>
       <div className="flex flex-col flex-1 px-4 py-8 max-w-7xl mx-auto w-full gap-6">
@@ -47,6 +56,8 @@ export default function SectorTrendPage() {
         />
 
         {isLoading && !data ? (
+          <RRGSkeleton />
+        ) : showTabSkeleton ? (
           <RRGSkeleton />
         ) : error && !data ? (
           <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
