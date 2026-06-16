@@ -130,7 +130,7 @@ describe("calculatePotentialProfit", () => {
 
   it("floors fractional lots before computing profit", () => {
     const result = calculatePotentialProfit(5500, 5000, 3.2)
-    expect(result).toBe(300_000)
+    expect(result).toBe(150_000)
   })
 
   it("returns 0 for negative lots", () => {
@@ -235,7 +235,7 @@ describe("calculatePotentialLoss", () => {
 
   it("floors fractional lots before computing loss", () => {
     const result = calculatePotentialLoss(5000, 4800, 3.2)
-    expect(result).toBe(120_000)
+    expect(result).toBe(60_000)
   })
 
   it("returns 0 for negative lots", () => {

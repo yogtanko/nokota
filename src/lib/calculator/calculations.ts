@@ -30,8 +30,11 @@ export function calculateRiskRewardRatio(
 export function calculatePotentialProfit(
   takeProfit: number,
   entryPrice: number,
-  shares: number,
+  lots: number,
+  lotSize: number = LOT_SIZE,
 ): number {
+  if (lots <= 0 || lotSize <= 0) return 0
+  const shares = Math.floor(lots) * lotSize
   return (takeProfit - entryPrice) * shares
 }
 
@@ -58,7 +61,10 @@ export function calculateMaxAffordableShares(
 export function calculatePotentialLoss(
   entryPrice: number,
   stopLoss: number,
-  shares: number,
+  lots: number,
+  lotSize: number = LOT_SIZE,
 ): number {
+  if (lots <= 0 || lotSize <= 0) return 0
+  const shares = Math.floor(lots) * lotSize
   return (entryPrice - stopLoss) * shares
 }
