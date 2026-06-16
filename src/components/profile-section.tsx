@@ -18,10 +18,12 @@ export default function ProfileSection() {
   )
 
   useEffect(() => {
-    if (hydrated) {
+    if (!hydrated) return
+    const timer = setTimeout(() => {
       setRiskText(String(riskPercent * 100).replace(".", ","))
-    }
-  }, [hydrated])
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [hydrated, riskPercent])
 
   return (
     <Card size="sm">
@@ -80,8 +82,8 @@ export default function ProfileSection() {
                   let raw = e.target.value.replace(/[^\d,]/g, "")
                   const commaIdx = raw.indexOf(",")
                   if (commaIdx !== -1) {
-                    let before = raw.slice(0, commaIdx)
-                    let after = raw.slice(commaIdx + 1).replace(/,/g, "").slice(0, 2)
+                    const before = raw.slice(0, commaIdx)
+                    const after = raw.slice(commaIdx + 1).replace(/,/g, "").slice(0, 2)
                     if (before === "") {
                       raw = "0," + after
                     } else {

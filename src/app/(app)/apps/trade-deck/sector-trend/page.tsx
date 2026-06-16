@@ -38,11 +38,9 @@ export default function SectorTrendPage() {
   )
 
   useEffect(() => {
-    if (isLoading && data) {
-      const timer = setTimeout(() => setShowTabSkeleton(true), 300)
-      return () => clearTimeout(timer)
-    }
-    setShowTabSkeleton(false)
+    const delay = isLoading && data ? 300 : 0
+    const timer = setTimeout(() => setShowTabSkeleton(isLoading && !!data), delay)
+    return () => clearTimeout(timer)
   }, [isLoading, data])
 
   return (
