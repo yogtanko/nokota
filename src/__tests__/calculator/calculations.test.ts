@@ -106,26 +106,40 @@ describe("calculateRiskRewardRatio", () => {
 
 describe("calculatePotentialProfit", () => {
   it("returns correct profit for a valid setup", () => {
-    const result = calculatePotentialProfit(5500, 5000, 1000)
+    const result = calculatePotentialProfit(5500, 5000, 10)
     expect(result).toBe(500_000)
   })
 
   it("returns 0 when take profit equals entry price", () => {
-    expect(calculatePotentialProfit(5000, 5000, 1000)).toBe(0)
+    expect(calculatePotentialProfit(5000, 5000, 10)).toBe(0)
   })
 
   it("returns negative profit (loss) when take profit is below entry", () => {
-    const result = calculatePotentialProfit(4800, 5000, 1000)
+    const result = calculatePotentialProfit(4800, 5000, 10)
     expect(result).toBe(-200_000)
   })
 
-  it("returns 0 for zero shares", () => {
+  it("returns 0 for zero lots", () => {
     expect(calculatePotentialProfit(5500, 5000, 0)).toBe(0)
   })
 
   it("handles large profits", () => {
-    const result = calculatePotentialProfit(10000, 1000, 100_000)
+    const result = calculatePotentialProfit(10000, 1000, 1000)
     expect(result).toBe(900_000_000)
+  })
+
+  it("floors fractional lots before computing profit", () => {
+    const result = calculatePotentialProfit(5500, 5000, 3.2)
+    expect(result).toBe(150_000)
+  })
+
+  it("returns 0 for negative lots", () => {
+    expect(calculatePotentialProfit(5500, 5000, -5)).toBe(0)
+  })
+
+  it("accepts custom lot size", () => {
+    const result = calculatePotentialProfit(5500, 5000, 10, 50)
+    expect(result).toBe(250_000)
   })
 })
 
@@ -202,20 +216,34 @@ describe("calculateMaxAffordableShares", () => {
 
 describe("calculatePotentialLoss", () => {
   it("returns correct loss for a valid setup", () => {
-    const result = calculatePotentialLoss(5000, 4800, 1000)
+    const result = calculatePotentialLoss(5000, 4800, 10)
     expect(result).toBe(200_000)
   })
 
   it("returns 0 when stop loss equals entry price", () => {
-    expect(calculatePotentialLoss(5000, 5000, 1000)).toBe(0)
+    expect(calculatePotentialLoss(5000, 5000, 10)).toBe(0)
   })
 
   it("returns negative when stop loss exceeds entry price", () => {
-    const result = calculatePotentialLoss(4800, 5000, 1000)
+    const result = calculatePotentialLoss(4800, 5000, 10)
     expect(result).toBe(-200_000)
   })
 
-  it("returns 0 for zero shares", () => {
+  it("returns 0 for zero lots", () => {
     expect(calculatePotentialLoss(5000, 4800, 0)).toBe(0)
+  })
+
+  it("floors fractional lots before computing loss", () => {
+    const result = calculatePotentialLoss(5000, 4800, 3.2)
+    expect(result).toBe(60_000)
+  })
+
+  it("returns 0 for negative lots", () => {
+    expect(calculatePotentialLoss(5000, 4800, -5)).toBe(0)
+  })
+
+  it("accepts custom lot size", () => {
+    const result = calculatePotentialLoss(5000, 4800, 10, 50)
+    expect(result).toBe(100_000)
   })
 })

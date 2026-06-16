@@ -47,8 +47,8 @@ export default function RiskCalculatorPage() {
   const shares = isCapped ? calculateMaxAffordableShares(balance, entry) : riskBasedShares
   const lots = calculateLots(shares)
   const rr = calculateRiskRewardRatio(entry, sl, tp)
-  const profit = calculatePotentialProfit(tp, entry, shares)
-  const loss = calculatePotentialLoss(entry, sl, shares)
+  const profit = calculatePotentialProfit(tp, entry, lots)
+  const loss = calculatePotentialLoss(entry, sl, lots)
   const cost = calculatePurchaseCost(lots, entry)
   const autoFillTakeProfit = (entryVal: number, slVal: number) => {
     if (tpManuallyEdited.current) return
