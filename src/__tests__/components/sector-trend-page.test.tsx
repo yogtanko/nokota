@@ -64,7 +64,7 @@ describe("SektorTrend Page", () => {
 
   it("renders page title and description", () => {
     render(<SectorTrendPage />)
-    expect(screen.getByText("SektorTrend")).toBeInTheDocument()
+    expect(screen.getByText("Sektor Trend")).toBeInTheDocument()
     expect(screen.getByText(/Relative Rotation Graph/i)).toBeInTheDocument()
   })
 

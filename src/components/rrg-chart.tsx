@@ -8,12 +8,8 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ReferenceLine,
   ReferenceArea,
-  Customized,
   ResponsiveContainer,
-  useXAxisScale,
-  useYAxisScale,
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { QUADRANT_STYLES, QUADRANT_FILLS } from "@/lib/rrg";
@@ -60,6 +56,7 @@ const QUADRANT_CONFIG = [
   },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function CustomDot(props: any) {
   const { cx, cy, fill } = props;
   if (cx == null || cy == null) return null;
@@ -76,6 +73,7 @@ function CustomDot(props: any) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function CustomLabel(props: any) {
   const { cx, cy, payload } = props;
   if (cx == null || cy == null) return null;
@@ -96,39 +94,12 @@ function CustomLabel(props: any) {
   );
 }
 
-function TailTrajectories({ sectors }: { sectors: SectorRRGData[] }) {
-  const xScale = useXAxisScale();
-  const yScale = useYAxisScale();
-  if (!xScale || !yScale) return null;
-
-  return (
-    <g pointerEvents="none">
-      {sectors.map((s) => {
-        if (!s.tail || s.tail.length < 2) return null;
-        const points = s.tail
-          .map((p) => `${xScale(p.rsRatio)},${yScale(p.rsMomentum)}`)
-          .join(" ");
-
-        return (
-          <polyline
-            key={s.ticker}
-            points={points}
-            fill="none"
-            stroke={DOT_COLOR}
-            strokeWidth={2}
-            strokeOpacity={0.6}
-          />
-        );
-      })}
-    </g>
-  );
-}
-
 function fmt(value: number | null | undefined, digits: number): string {
   if (value == null || isNaN(value)) return "—";
   return value.toFixed(digits);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function CustomTooltip({ active, payload }: any) {
   if (!active || !payload || !payload.length) return null;
 
@@ -273,9 +244,6 @@ export function RRGChart({ sectors }: RRGChartProps) {
             />
           ))}
 
-          {/* <ReferenceLine x={100} stroke="var(--border)" strokeWidth={1.5} />
-          <ReferenceLine y={100} stroke="var(--border)" strokeWidth={1.5} /> */}
-
           <Tooltip
             content={<CustomTooltip />}
             cursor={false}
@@ -289,7 +257,6 @@ export function RRGChart({ sectors }: RRGChartProps) {
             isAnimationActive={false}
           />
 
-          {/* <Customized component={<TailTrajectories sectors={sectors} />} /> */}
         </ScatterChart>
       </ResponsiveContainer>
     </div>

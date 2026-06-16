@@ -90,7 +90,7 @@ describe("getRRGData", () => {
   })
 
   it("stores computed result in Redis on cache miss", async () => {
-    const result = await getRRGData("daily")
+    await getRRGData("daily")
 
     expect(mockSet).toHaveBeenCalledWith(
       "rrg:daily",

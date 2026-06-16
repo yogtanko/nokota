@@ -1,6 +1,6 @@
 "use client";
 
-import { IconChartDots3, IconClock } from "@tabler/icons-react";
+import { IconChartDots3 } from "@tabler/icons-react";
 
 export function RRGComingSoon() {
   return (

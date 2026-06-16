@@ -9,6 +9,8 @@ vi.mock("yahoo-finance2", () => {
 
 import { fetchSectorOHLCV } from "@/lib/rrg/sector-data"
 
+import YahooFinance from "yahoo-finance2"
+
 function makeChartQuote(close: number | null, dateOffset = 0) {
   return {
     close,
@@ -19,9 +21,6 @@ function makeChartQuote(close: number | null, dateOffset = 0) {
     volume: null,
   }
 }
-
-import YahooFinance from "yahoo-finance2"
-const mockYf = YahooFinance as unknown as { prototype: { chart: ReturnType<typeof vi.fn> } }
 
 describe("fetchSectorOHLCV", () => {
   beforeEach(() => {
