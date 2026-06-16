@@ -5,8 +5,7 @@ import { SECTOR_TICKERS, CHART_CONFIG } from "@/lib/rrg/constants"
 import { computeRRG } from "@/lib/rrg/calculations"
 import { getRedis } from "@/lib/redis"
 import { getAdaptiveTTL, CACHE_KEYS } from "@/lib/rrg/constants"
-import type { RRGTimeframe, TailPoint } from "@/lib/rrg/types"
-import { Quadrant } from "@/lib/rrg/types"
+import type { TailPoint } from "@/lib/rrg/types"
 import type { SectorRRGData, RRGApiResponse } from "@/lib/rrg/rrg-service"
 
 function isAuthorized(request: Request): boolean {
@@ -55,7 +54,6 @@ async function handleRRGCron(request: Request) {
   }
 
   const yf = new YahooFinance()
-  const today = todayStr()
 
   try {
     const symbols = SECTOR_TICKERS.map((t) => t.ticker)

@@ -8,12 +8,8 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ReferenceLine,
   ReferenceArea,
-  Customized,
   ResponsiveContainer,
-  useXAxisScale,
-  useYAxisScale,
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { QUADRANT_STYLES, QUADRANT_FILLS } from "@/lib/rrg";
@@ -93,34 +89,6 @@ function CustomLabel(props: any) {
     >
       {label}
     </text>
-  );
-}
-
-function TailTrajectories({ sectors }: { sectors: SectorRRGData[] }) {
-  const xScale = useXAxisScale();
-  const yScale = useYAxisScale();
-  if (!xScale || !yScale) return null;
-
-  return (
-    <g pointerEvents="none">
-      {sectors.map((s) => {
-        if (!s.tail || s.tail.length < 2) return null;
-        const points = s.tail
-          .map((p) => `${xScale(p.rsRatio)},${yScale(p.rsMomentum)}`)
-          .join(" ");
-
-        return (
-          <polyline
-            key={s.ticker}
-            points={points}
-            fill="none"
-            stroke={DOT_COLOR}
-            strokeWidth={2}
-            strokeOpacity={0.6}
-          />
-        );
-      })}
-    </g>
   );
 }
 
@@ -273,9 +241,6 @@ export function RRGChart({ sectors }: RRGChartProps) {
             />
           ))}
 
-          {/* <ReferenceLine x={100} stroke="var(--border)" strokeWidth={1.5} />
-          <ReferenceLine y={100} stroke="var(--border)" strokeWidth={1.5} /> */}
-
           <Tooltip
             content={<CustomTooltip />}
             cursor={false}
@@ -289,7 +254,6 @@ export function RRGChart({ sectors }: RRGChartProps) {
             isAnimationActive={false}
           />
 
-          {/* <Customized component={<TailTrajectories sectors={sectors} />} /> */}
         </ScatterChart>
       </ResponsiveContainer>
     </div>

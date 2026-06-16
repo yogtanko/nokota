@@ -75,9 +75,9 @@ describe("RRGChart", () => {
     expect(screen.getAllByTestId("recharts-ReferenceArea")).toHaveLength(4)
   })
 
-  it("renders 2 ReferenceLines (x=100, y=100)", () => {
+  it("renders no ReferenceLines (commented out)", () => {
     render(<RRGChart sectors={mockSectors} />)
-    expect(screen.getAllByTestId("recharts-ReferenceLine")).toHaveLength(2)
+    expect(screen.queryByTestId("recharts-ReferenceLine")).not.toBeInTheDocument()
   })
 
   it("passes correct number of data points to Scatter", () => {
