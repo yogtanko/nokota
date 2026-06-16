@@ -18,10 +18,12 @@ export default function ProfileSection() {
   )
 
   useEffect(() => {
-    if (hydrated) {
+    if (!hydrated) return
+    const timer = setTimeout(() => {
       setRiskText(String(riskPercent * 100).replace(".", ","))
-    }
-  }, [hydrated])
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [hydrated, riskPercent])
 
   return (
     <Card size="sm">
