@@ -56,6 +56,7 @@ const QUADRANT_CONFIG = [
   },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function CustomDot(props: any) {
   const { cx, cy, fill } = props;
   if (cx == null || cy == null) return null;
@@ -72,6 +73,7 @@ function CustomDot(props: any) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function CustomLabel(props: any) {
   const { cx, cy, payload } = props;
   if (cx == null || cy == null) return null;
@@ -97,6 +99,7 @@ function fmt(value: number | null | undefined, digits: number): string {
   return value.toFixed(digits);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function CustomTooltip({ active, payload }: any) {
   if (!active || !payload || !payload.length) return null;
 
